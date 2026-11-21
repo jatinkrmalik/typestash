@@ -410,7 +410,7 @@ function renderSide() {
       : `<div class="side-hint">Group fonts for a project: use <b>⋯</b> on any card.</div>`}
     <h4>Tools</h4>
     ${navA("#/compare", ICON.compare, "Compare", S.picks.length || undefined, r.name === "compare")}
-    <button class="nav" data-act="palette">${ICON.command}<span>Command bar</span><span class="count">${MOD_LABEL} K</span></button>
+    <button class="nav" data-act="palette">${ICON.command}<span>Command bar</span><span class="count kbd-hint">${MOD_LABEL} K</span></button>
     ${navA("#/settings", ICON.gear, "Settings", undefined, r.name === "settings")}
     ${navA("#/health", ICON.alert, "Duplicates & issues", (st.duplicates + st.broken) || undefined, r.name === "health")}
     <div class="side-foot">
@@ -428,14 +428,38 @@ function timeAgo(t) {
   return `${Math.round(s / 86400)} d ago`;
 }
 
+// Wide screens: a sidebar you can collapse (remembered). Phones: a drawer, closed by default.
+const narrowSide = matchMedia("(max-width: 699.98px)");
+const sideOpen = () => {
+  const layout = document.querySelector(".layout");
+  return narrowSide.matches ? layout.classList.contains("drawer-open") : !layout.classList.contains("side-collapsed");
+};
+function syncSideBtn() {
+  const open = sideOpen();
+  $("#side-btn").setAttribute("aria-expanded", String(open));
+  $("#side-btn").title = `${open ? "Hide" : "Show"} sidebar  [`;
+}
 function toggleSidebar(force) {
   const layout = document.querySelector(".layout");
-  const collapsed = force !== undefined ? force : !layout.classList.contains("side-collapsed");
-  layout.classList.toggle("side-collapsed", collapsed);
-  store.set("sideCollapsed", collapsed);
-  $("#side-btn").setAttribute("aria-expanded", String(!collapsed));
-  $("#side-btn").title = `${collapsed ? "Show" : "Hide"} sidebar  [`;
+  if (narrowSide.matches) {
+    layout.classList.toggle("drawer-open", force !== undefined ? !force : !layout.classList.contains("drawer-open"));
+  } else {
+    const collapsed = force !== undefined ? force : !layout.classList.contains("side-collapsed");
+    layout.classList.toggle("side-collapsed", collapsed);
+    store.set("sideCollapsed", collapsed);
+  }
+  syncSideBtn();
 }
+function closeDrawer() {
+  if (!document.querySelector(".layout").classList.contains("drawer-open")) return;
+  document.querySelector(".layout").classList.remove("drawer-open");
+  syncSideBtn();
+}
+narrowSide.addEventListener("change", () => {
+  document.querySelector(".layout").classList.remove("drawer-open");
+  document.querySelector(".layout").classList.toggle("side-collapsed", store.get("sideCollapsed", false));
+  syncSideBtn();
+});
 
 // ------------------------------------------------------------------ router
 function route() {
@@ -1427,7 +1451,7 @@ function paletteCommands() {
     { g: "Actions", icon: ICON.plus, label: "Add fonts…", k: "upload import", hint: "drop anywhere", run: () => $("#file-input").click() },
     { g: "Actions", icon: ICON.shuffle, label: "Surprise me", k: "random font shuffle", run: surprise },
     { g: "Actions", icon: ICON.palette, label: `Switch to ${dark ? "light" : "dark"} theme`, k: "theme mode toggle", hint: "d", run: toggleDark },
-    { g: "Actions", icon: ICON.sidebar, label: `${document.querySelector(".layout").classList.contains("side-collapsed") ? "Show" : "Hide"} sidebar`, k: "collapse panel", hint: "[", run: toggleSidebar },
+    { g: "Actions", icon: ICON.sidebar, label: `${sideOpen() ? "Hide" : "Show"} sidebar`, k: "collapse panel", hint: "[", run: toggleSidebar },
     { g: "Actions", icon: ICON.refresh, label: "Rescan fonts folder", k: "index reload", run: rescan },
     { g: "Actions", icon: ICON.plus, label: "New collection…", k: "create group", run: () => newCollection() },
     { g: "Actions", icon: ICON.copy, label: "Copy link to this page", k: "share url", run: () => copy(location.href, "Link copied") },
@@ -1698,7 +1722,12 @@ $("#side-btn").innerHTML = ICON.sidebar;
 $("#surprise-btn").insertAdjacentHTML("afterbegin", ICON.shuffle);
 $("#surprise-btn").addEventListener("click", surprise);
 $("#side-btn").addEventListener("click", () => toggleSidebar());
-toggleSidebar(store.get("sideCollapsed", false));
+document.querySelector(".layout").classList.toggle("side-collapsed", store.get("sideCollapsed", false));
+syncSideBtn();
+$("#side-scrim").addEventListener("click", closeDrawer);
+$("#side").addEventListener("click", (e) => { if (narrowSide.matches && e.target.closest("a[href], .nav")) setTimeout(closeDrawer, 120); });
+addEventListener("hashchange", closeDrawer);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
 $$("kbd .mod, kbd.mod").forEach((k) => { k.textContent = MOD_LABEL; });
 $("#upload-btn").addEventListener("click", () => $("#file-input").click());
 $("#wordmark").addEventListener("click", () => shuffleWordmark(true));
