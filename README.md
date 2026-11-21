@@ -71,8 +71,14 @@ keeps a small index next to them, so Samba, rsync and your backups keep working.
   specimen sheet.
 - **Housekeeping.** A duplicates & issues page lists identical files and fonts
   that could not be read. Nothing is ever deleted.
-- **Command bar** (`Ctrl/⌘ K`), keyboard shortcuts (`/` search, `d` theme,
-  `Esc` back), paper and ink themes, works on phones.
+- **12 themes.** Paper and Ink plus GitHub Light, Solarized Light, Catppuccin
+  Latte and Mocha, Gruvbox Light and Dark, Rosé Pine Dawn, Dracula, Nord and
+  Tokyo Night. Pick one from the theme panel, or let it follow your system with
+  a light and a dark favourite. Every theme passes WCAG AA contrast for text.
+- **Settings page** for appearance, preview defaults, keyboard shortcuts and
+  server info.
+- **Command bar** (`Ctrl/⌘ K`), keyboard shortcuts (`/` search, `d` light/dark,
+  `,` settings, `Esc` back), works on phones.
 - Supports **TTF, OTF, WOFF, WOFF2, TTC/OTC** collections and zips.
 
 ![Family page with type tester](docs/family.png)

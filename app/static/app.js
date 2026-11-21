@@ -149,6 +149,8 @@ const ICON = {
   trash: '<svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>',
   pen: '<svg class="i" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>',
   tag: '<svg class="i" viewBox="0 0 24 24"><path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>',
+  palette: '<svg class="i" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.6 0-.9.7-1.5 1.7-1.5h2.2a3.8 3.8 0 0 0 3.8-3.8C20.5 6.6 16.7 3.5 12 3.5z"/><circle cx="7.6" cy="11" r="1.1"/><circle cx="10" cy="7.3" r="1.1"/><circle cx="14.6" cy="7.4" r="1.1"/></svg>',
+  gear: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.5 7.5 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4z"/></svg>',
   open: '<svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg>',
 };
 
@@ -280,12 +282,109 @@ function shuffleWordmark(animate = true) {
   });
   if (animate) { wm.classList.remove("shuffle"); void wm.offsetWidth; wm.classList.add("shuffle"); }
 }
-function setTheme(t) {
-  document.documentElement.dataset.theme = t;
-  store.set("theme", t);
-  try { localStorage.setItem("tc.theme", t); } catch { /* */ }
-  $("#theme-btn").innerHTML = t === "dark" ? ICON.sun : ICON.moon;
+// ------------------------------------------------------------------ themes
+// c: [background, card, text, accent, blue, green, pink] for the picker previews.
+const THEMES = [
+  { id: "paper", name: "Paper", mode: "light", c: ["#f3eee4", "#fffbf3", "#17140f", "#ff4a1c", "#2f5bff", "#12a36b", "#f0458f"] },
+  { id: "github-light", name: "GitHub Light", mode: "light", c: ["#f6f8fa", "#ffffff", "#1f2328", "#0969da", "#8250df", "#1a7f37", "#bf3989"] },
+  { id: "solarized-light", name: "Solarized Light", mode: "light", c: ["#fdf6e3", "#fffbee", "#073642", "#cb4b16", "#268bd2", "#859900", "#d33682"] },
+  { id: "catppuccin-latte", name: "Catppuccin Latte", mode: "light", c: ["#eff1f5", "#fbfbfd", "#4c4f69", "#8839ef", "#1e66f5", "#40a02b", "#ea76cb"] },
+  { id: "gruvbox-light", name: "Gruvbox Light", mode: "light", c: ["#fbf1c7", "#fdf6d9", "#3c3836", "#af3a03", "#076678", "#79740e", "#8f3f71"] },
+  { id: "rose-pine-dawn", name: "Rosé Pine Dawn", mode: "light", c: ["#faf4ed", "#fffaf3", "#575279", "#a5566d", "#286983", "#56949f", "#907aa9"] },
+  { id: "ink", name: "Ink", mode: "dark", c: ["#13110e", "#1d1a16", "#f4ede1", "#ff6a3d", "#6f8cff", "#3fd19a", "#ff6fae"] },
+  { id: "dracula", name: "Dracula", mode: "dark", c: ["#21222c", "#282a36", "#f8f8f2", "#bd93f9", "#8be9fd", "#50fa7b", "#ff79c6"] },
+  { id: "nord", name: "Nord", mode: "dark", c: ["#2e3440", "#353c4a", "#eceff4", "#88c0d0", "#81a1c1", "#a3be8c", "#b48ead"] },
+  { id: "catppuccin-mocha", name: "Catppuccin Mocha", mode: "dark", c: ["#1e1e2e", "#24243a", "#cdd6f4", "#cba6f7", "#89b4fa", "#a6e3a1", "#f5c2e7"] },
+  { id: "gruvbox-dark", name: "Gruvbox Dark", mode: "dark", c: ["#282828", "#2f2d2b", "#ebdbb2", "#fe8019", "#83a598", "#b8bb26", "#d3869b"] },
+  { id: "tokyo-night", name: "Tokyo Night", mode: "dark", c: ["#1a1b26", "#1f2335", "#c0caf5", "#7aa2f7", "#bb9af7", "#9ece6a", "#f7768e"] },
+];
+const THEME_KEY = { mode: "tc.themeMode", light: "tc.themeLight", dark: "tc.themeDark" };
+const rawGet = (k, d) => { try { const v = localStorage.getItem(k); return v ? v.replace(/^"|"$/g, "") : d; } catch { return d; } };
+const rawSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } };
+const sysDark = matchMedia("(prefers-color-scheme: dark)");
+const themeById = (id) => THEMES.find((t) => t.id === id);
+function themePrefs() {
+  const legacy = rawGet("tc.theme", null);            // before 0.2: "light" | "dark"
+  if (legacy && !rawGet(THEME_KEY.mode, null)) {
+    rawSet(THEME_KEY.mode, legacy === "dark" ? "dark" : "light");
+    try { localStorage.removeItem("tc.theme"); } catch { /* */ }
+  }
+  const light = themeById(rawGet(THEME_KEY.light, "paper"));
+  const dark = themeById(rawGet(THEME_KEY.dark, "ink"));
+  return {
+    mode: rawGet(THEME_KEY.mode, "auto"),
+    light: light && light.mode === "light" ? light.id : "paper",
+    dark: dark && dark.mode === "dark" ? dark.id : "ink",
+  };
 }
+function applyTheme() {
+  const p = themePrefs();
+  const dark = p.mode === "dark" || (p.mode === "auto" && sysDark.matches);
+  const t = themeById(dark ? p.dark : p.light);
+  const de = document.documentElement;
+  de.dataset.theme = t.id;
+  de.dataset.mode = t.mode;
+  const btn = $("#theme-btn");
+  btn.innerHTML = ICON.palette;
+  btn.title = `Theme: ${t.name}${p.mode === "auto" ? " (matching system)" : ""}`;
+  $$(".theme-picker").forEach((el) => { el.outerHTML = themePickerHTML(); });
+}
+function pickTheme(id) {
+  const t = themeById(id);
+  if (!t) return;
+  rawSet(t.mode === "dark" ? THEME_KEY.dark : THEME_KEY.light, t.id);
+  if (themePrefs().mode !== "auto") rawSet(THEME_KEY.mode, t.mode);
+  else if ((t.mode === "dark") !== sysDark.matches) toast(`${t.name} will be used when your system is in ${t.mode} mode`);
+  applyTheme();
+}
+function setThemeAuto(on) {
+  rawSet(THEME_KEY.mode, on ? "auto" : document.documentElement.dataset.mode);
+  applyTheme();
+}
+function toggleDark() {
+  rawSet(THEME_KEY.mode, document.documentElement.dataset.mode === "dark" ? "light" : "dark");
+  applyTheme();
+  toast(`${themeById(document.documentElement.dataset.theme).name} theme`);
+}
+sysDark.addEventListener("change", () => { if (themePrefs().mode === "auto") applyTheme(); });
+function themePickerHTML() {
+  const p = themePrefs();
+  const cur = document.documentElement.dataset.theme;
+  const card = (t) => {
+    const preferred = p.mode === "auto" && (p.light === t.id || p.dark === t.id);
+    return `<button type="button" class="theme-card ${cur === t.id ? "on" : ""} ${preferred ? "pref" : ""}" data-theme-pick="${t.id}"
+      aria-pressed="${cur === t.id}" style="--tp:${t.c[0]};--tc:${t.c[1]};--ti:${t.c[2]};--ta:${t.c[3]}">
+      <span class="tp-prev"><span class="tp-win"><b>Aa</b><i></i><i class="short"></i><em></em></span>
+        <span class="tp-dots">${t.c.slice(3).map((c) => `<i style="background:${c}"></i>`).join("")}</span></span>
+      <span class="tp-name">${esc(t.name)}${preferred && cur !== t.id ? `<small>${t.mode}</small>` : ""}</span></button>`;
+  };
+  return `<div class="theme-picker">
+    <label class="tp-auto"><input type="checkbox" data-theme-auto ${p.mode === "auto" ? "checked" : ""}>
+      <span><b>Match system</b><small>${p.mode === "auto"
+        ? `${esc(themeById(p.light).name)} when your system is light, ${esc(themeById(p.dark).name)} when it's dark`
+        : "Switch between your light and dark theme with your OS"}</small></span></label>
+    <h5>Light</h5><div class="tp-grid">${THEMES.filter((t) => t.mode === "light").map(card).join("")}</div>
+    <h5>Dark</h5><div class="tp-grid">${THEMES.filter((t) => t.mode === "dark").map(card).join("")}</div>
+  </div>`;
+}
+function openThemePanel() {
+  closeMenu();
+  const panel = $("#theme-panel");
+  if (!panel.hidden) { panel.hidden = true; return; }
+  panel.innerHTML = `<div class="tp-head"><b>Theme</b><a href="#/settings" data-close-theme>All settings →</a></div>${themePickerHTML()}`;
+  panel.hidden = false;
+  const r = $("#theme-btn").getBoundingClientRect();
+  panel.style.top = `${r.bottom + 8}px`;
+  panel.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+}
+document.addEventListener("click", (e) => {
+  const pick = e.target.closest("[data-theme-pick]");
+  if (pick) { pickTheme(pick.dataset.themePick); return; }
+  const panel = $("#theme-panel");
+  if (!panel.hidden && (e.target.closest("[data-close-theme]") || (!e.target.closest("#theme-panel") && !e.target.closest("#theme-btn")))) panel.hidden = true;
+});
+document.addEventListener("change", (e) => { if (e.target.matches("[data-theme-auto]")) setThemeAuto(e.target.checked); });
+
 function renderSide() {
   const r = route();
   const st = S.lib.stats;
@@ -305,6 +404,7 @@ function renderSide() {
     <h4>Tools</h4>
     ${navA("#/compare", ICON.compare, "Compare", S.picks.length || undefined, r.name === "compare")}
     ${navA("#/health", ICON.alert, "Duplicates & issues", (st.duplicates + st.broken) || undefined, r.name === "health")}
+    ${navA("#/settings", ICON.gear, "Settings", undefined, r.name === "settings")}
     <div class="side-foot">
       <div>${plural(st.files, "file")} · ${fmtBytes(st.bytes)}</div>
       ${scan.scanning ? `<div>Indexing ${scan.done} / ${scan.total}…</div><div class="bar"><i style="width:${scan.total ? (100 * scan.done / scan.total) : 0}%"></i></div>`
@@ -331,6 +431,7 @@ function route() {
   if (a === "f") return { name: "family", key: b };
   if (a === "compare") return { name: "compare" };
   if (a === "health") return { name: "health" };
+  if (a === "settings") return { name: "settings" };
   return { name: "all" };
 }
 let lastGalleryScroll = 0;
@@ -343,6 +444,7 @@ function render() {
   if (r.name === "family") familyPage(r.key);
   else if (r.name === "compare") comparePage();
   else if (r.name === "health") healthPage();
+  else if (r.name === "settings") settingsPage();
   else {
     const back = r.name === "all" && lastRouteName === "family";
     gallery(r);
@@ -1101,7 +1203,9 @@ function paletteCommands() {
   return [
     { label: "Add fonts…", hint: "upload", run: () => $("#file-input").click() },
     { label: "Surprise me", hint: "random font", run: surprise },
-    { label: `Switch to ${document.documentElement.dataset.theme === "dark" ? "paper" : "ink"} theme`, hint: "theme", run: () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark") },
+    { label: `Switch to ${document.documentElement.dataset.mode === "dark" ? "light" : "dark"} theme`, hint: "d", run: toggleDark },
+    { label: "Settings", hint: ",", run: () => { location.hash = "#/settings"; } },
+    ...THEMES.map((t) => ({ label: `Theme: ${t.name}`, hint: t.mode, run: () => pickTheme(t.id) })),
     { label: "All fonts", hint: "go", run: () => { location.hash = "#/"; } },
     { label: "Favourites", hint: "go", run: () => { location.hash = "#/fav"; } },
     { label: "Recently added", hint: "go", run: () => { location.hash = "#/recent"; } },
@@ -1291,16 +1395,18 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   if (e.key === "Escape") {
-    if (!$("#menu").hidden) closeMenu();
+    if (!$("#theme-panel").hidden) $("#theme-panel").hidden = true;
+    else if (!$("#menu").hidden) closeMenu();
     else if (route().name === "family") history.length > 1 ? history.back() : (location.hash = "#/");
     else if (document.activeElement?.id === "q") document.activeElement.blur();
   }
   if (typing) return;
   if (e.key === "/" && $("#q")) { e.preventDefault(); $("#q").focus(); }
-  if (e.key === "d" && !e.ctrlKey && !e.metaKey) setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  if (e.key === "d" && !e.ctrlKey && !e.metaKey) toggleDark();
+  if (e.key === "," && !e.ctrlKey && !e.metaKey) location.hash = "#/settings";
 });
 $("#cmdk-btn").addEventListener("click", () => openPalette());
-$("#theme-btn").addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+$("#theme-btn").addEventListener("click", openThemePanel);
 $("#upload-btn").innerHTML = `${ICON.plus}<span class="lbl-long">Add fonts</span>`;
 $("#upload-btn").addEventListener("click", () => $("#file-input").click());
 $("#wordmark").addEventListener("click", () => shuffleWordmark(true));
@@ -1348,6 +1454,80 @@ async function deleteCollection() {
   toast(`Collection “${c.name}” deleted`);
 }
 
+// ------------------------------------------------------------------ settings
+const PREF_KEYS = ["tc.themeMode", "tc.themeLight", "tc.themeDark", "tc.theme", "tc.text", "tc.size", "tc.view", "tc.sort", "tc.picks", "tc.cmpsize"];
+function settingsPage() {
+  const st = S.lib.stats;
+  const scan = S.lib.scan;
+  const mod = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? "⌘" : "Ctrl";
+  const keys = [[["/"], "Search the library"], [[mod, "K"], "Jump to a font, collection or action"], [["d"], "Switch between your light and dark theme"],
+    [[","], "Open settings"], [["Esc"], "Close a menu, or go back from a font"], [["↑", "↓", "↵"], "Move and pick in the command bar"]];
+  $("#view").innerHTML = `<div class="settings">
+    <div class="cmp-head"><h1>Settings</h1><span style="color:var(--muted);font-size:14px">Preferences are saved in this browser</span></div>
+
+    <section class="set-sec" id="appearance"><h2>// appearance</h2>${themePickerHTML()}</section>
+
+    <section class="set-sec"><h2>// preview defaults</h2>
+      <div class="set-rows">
+        <label class="set-row"><span>Sample text<small>Empty uses a pangram that suits each category</small></span>
+          <input class="set-input" id="set-text" placeholder="Category pangrams" value="${esc(S.text)}" autocomplete="off"></label>
+        <label class="set-row"><span>Preview size</span>
+          <span class="set-ctl"><input type="range" id="set-size" min="14" max="140" value="${S.size}"><code id="set-size-v">${S.size}px</code></span></label>
+        <div class="set-row"><span>Layout</span>
+          <div class="seg" role="group" aria-label="Layout">${[["grid", ICON.grid, "Grid"], ["list", ICON.list, "List"]].map(([v, ic, l]) =>
+            `<button type="button" data-set-view="${v}" class="${S.view === v ? "on" : ""}" title="${l}">${ic}</button>`).join("")}</div></div>
+        <label class="set-row"><span>Sort fonts by</span>
+          <select class="sel" id="set-sort">${[["az", "A → Z"], ["new", "Newest"], ["styles", "Most styles"], ["shuffle", "Shuffle"]].map(([v, l]) =>
+            `<option value="${v}" ${S.sort === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      </div>
+    </section>
+
+    <section class="set-sec"><h2>// keyboard</h2>
+      <dl class="set-keys">${keys.map(([ks, what]) => `<div><dt>${ks.map((k) => `<kbd>${esc(k)}</kbd>`).join("")}</dt><dd>${esc(what)}</dd></div>`).join("")}</dl>
+    </section>
+
+    <section class="set-sec"><h2>// ${DEMO ? "this demo" : "this server"}</h2>
+      <dl class="kv set-kv">
+        <dt>Version</dt><dd><code>v${esc(S.lib.version || "?")}</code></dd>
+        <dt>Library</dt><dd>${plural(st.families, "family")} · ${plural(st.faces, "style")} · ${fmtBytes(st.bytes)}</dd>
+        <dt>Files</dt><dd>${plural(st.files, "file")}${st.duplicates ? ` · <a href="#/health">${plural(st.duplicates, "duplicate")}</a>` : ""}${st.broken ? ` · <a href="#/health">${st.broken} unreadable</a>` : ""}</dd>
+        <dt>Uploads</dt><dd>${DEMO ? "Off in the demo" : S.lib.uploads === false ? "Off (<code>TYPESTASH_UPLOADS=false</code>)" : "On"}</dd>
+        <dt>Index</dt><dd>${scan.scanning ? `Indexing ${scan.done} / ${scan.total}…` : scan.last ? `Updated ${timeAgo(scan.last)}` : "—"}</dd>
+      </dl>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+        <button class="btn small" data-act="rescan">${ICON.refresh} Rescan fonts folder</button>
+        <a class="btn small ghost" href="#/health">${ICON.alert} Duplicates & issues</a>
+      </div>
+    </section>
+
+    <section class="set-sec"><h2>// reset</h2>
+      <p class="set-note">Clears the theme, preview and compare preferences saved in this browser. Fonts, favourites, collections and notes live ${DEMO ? "in the demo's own storage" : "on the server"} and aren't touched.</p>
+      <button class="btn small" data-act="resetprefs">${ICON.trash} Reset preferences</button>
+    </section>
+  </div>`;
+  if (location.hash.endsWith("#appearance")) $("#appearance").scrollIntoView();
+}
+document.addEventListener("input", (e) => {
+  if (e.target.id === "set-text") { S.text = e.target.value; store.set("text", S.text); }
+  if (e.target.id === "set-size") { S.size = Number(e.target.value); store.set("size", S.size); $("#set-size-v").textContent = `${S.size}px`; }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id === "set-sort") { S.sort = e.target.value; store.set("sort", S.sort); toast("Sort order saved"); }
+});
+document.addEventListener("click", (e) => {
+  const v = e.target.closest("[data-set-view]");
+  if (v) {
+    S.view = v.dataset.setView; store.set("view", S.view);
+    $$("[data-set-view]").forEach((b) => b.classList.toggle("on", b === v));
+  }
+  const r = e.target.closest("[data-act=resetprefs]");
+  if (r) {
+    if (!r.dataset.armed) { r.dataset.armed = "1"; r.innerHTML = `${ICON.trash} Click again to reset`; setTimeout(() => { if (document.body.contains(r)) { delete r.dataset.armed; r.innerHTML = `${ICON.trash} Reset preferences`; } }, 4000); return; }
+    PREF_KEYS.forEach((k) => { try { localStorage.removeItem(k); } catch { /* */ } });
+    location.reload();
+  }
+});
+
 // ------------------------------------------------------------------ boot
 (async function boot() {
   document.title = DEMO ? `${APP_NAME} · live demo` : APP_NAME;
@@ -1355,7 +1535,7 @@ async function deleteCollection() {
     document.body.insertAdjacentHTML("afterbegin", `<div class="demo-bar"><b>Live demo</b> with free Google Fonts. Favourites, notes and collections stay in your browser.
       <a href="${REPO}" target="_blank" rel="noopener">Self-host it with one Docker command →</a></div>`);
   }
-  setTheme(document.documentElement.dataset.theme || "light");
+  applyTheme();
   try {
     await loadLibrary();
   } catch (e) {
