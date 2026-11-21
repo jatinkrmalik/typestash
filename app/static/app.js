@@ -316,7 +316,7 @@ function themePrefs() {
   const light = themeById(rawGet(THEME_KEY.light, "paper"));
   const dark = themeById(rawGet(THEME_KEY.dark, "ink"));
   return {
-    mode: rawGet(THEME_KEY.mode, "auto"),
+    mode: rawGet(THEME_KEY.mode, "light"),
     light: light && light.mode === "light" ? light.id : "paper",
     dark: dark && dark.mode === "dark" ? dark.id : "ink",
   };

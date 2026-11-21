@@ -16,7 +16,7 @@
     var LIGHT = { "paper": 1, "github-light": 1, "solarized-light": 1, "catppuccin-latte": 1, "gruvbox-light": 1, "rose-pine-dawn": 1 };
     function get(k) { try { var v = localStorage.getItem(k); return v ? v.replace(/^"|"$/g, "") : null; } catch (e) { return null; } }
     var legacy = get("tc.theme");
-    var mode = get("tc.themeMode") || (legacy === "dark" ? "dark" : legacy === "light" ? "light" : "auto");
+    var mode = get("tc.themeMode") || (legacy === "dark" ? "dark" : "light");
     var light = LIGHT[get("tc.themeLight")] ? get("tc.themeLight") : "paper";
     var dark = DARK[get("tc.themeDark")] ? get("tc.themeDark") : "ink";
     var isDark = mode === "dark" || (mode === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
