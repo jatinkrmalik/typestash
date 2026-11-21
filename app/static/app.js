@@ -1102,7 +1102,11 @@ async function exportSpecimen(f) {
   const c = document.createElement("canvas");
   const lines = [];
   const css = getComputedStyle(document.documentElement);
-  const paper = "#f5f0e6", ink = "#17140f", accent = css.getPropertyValue("--accent").trim() || "#ff4a1c", muted = "#7a7064";
+  // Specimens always use the Paper palette, whatever theme the app is in.
+  const paper = "#f5f0e6", ink = "#17140f", accent = "#ff4a1c", muted = "#6c6256", rule = "#ddd3c2";
+  const logo = await new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = "static/icon-512.png"; });
+  const GH = new Path2D("M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8");
+  const repoUrl = LINKS.source.replace(/^https?:\/\//, "");
   const fam = (id) => `'tc-${id}'`;
   const rep = f.rep;
   const sample = SAMPLES[f.category] || SAMPLES.other;
@@ -1123,11 +1127,27 @@ async function exportSpecimen(f) {
       g.fillStyle = muted; g.font = "20px ui-monospace, Consolas, monospace"; g.fillText(`${x.style}`.slice(0, 22), P, y + 58);
       g.fillStyle = ink; g.font = `52px ${fam(x.id)}`; fitText(g, sample, P + 300, y + 66, W - 2 * P - 300, 52, fam(x.id));
     } })),
-    { h: 330, draw: (g, y) => {
+    { h: 230, draw: (g, y) => {
       g.fillStyle = ink; g.font = `30px ${fam(rep)}`;
       wrap(g, "Typography is the craft of endowing human language with a durable visual form. A good typeface disappears into the reading; a great one makes you stop and look. This sheet shows the family at display and text sizes so you can judge both.", P, y + 70, W - 2 * P, 46);
     } },
-    { h: 70, draw: (g, y) => { g.fillStyle = muted; g.font = "20px ui-monospace, Consolas, monospace"; g.fillText(`${APP_NAME.toUpperCase()} · ${new Date().toLocaleDateString()}`, P, y + 40); } },
+    { h: 120, draw: (g, y) => {
+      // brand row: monogram · Typestash · GitHub mark + repo URL ............ date
+      g.strokeStyle = rule; g.lineWidth = 1.5; g.beginPath(); g.moveTo(P, y + 14); g.lineTo(W - P, y + 14); g.stroke();
+      const mid = y + 74;
+      let x = P;
+      if (logo) { g.drawImage(logo, x, mid - 26, 52, 52); x += 68; }
+      g.fillStyle = ink; g.font = "700 30px ui-sans-serif, system-ui, Segoe UI, sans-serif"; g.textBaseline = "middle";
+      g.fillText(APP_NAME, x, mid);
+      x += g.measureText(APP_NAME).width + 34;
+      g.fillStyle = rule; g.fillRect(x - 17, mid - 16, 2, 32);
+      g.save(); g.translate(x, mid - 12); g.scale(1.5, 1.5); g.fillStyle = muted; g.fill(GH); g.restore();
+      g.fillStyle = muted; g.font = "500 22px ui-monospace, Cascadia Mono, Consolas, monospace";
+      g.fillText(repoUrl, x + 36, mid + 1);
+      g.textAlign = "right"; g.font = "20px ui-monospace, Cascadia Mono, Consolas, monospace";
+      g.fillText(new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }), W - P, mid + 1);
+      g.textAlign = "left"; g.textBaseline = "alphabetic";
+    } },
   ];
   const H = plan.reduce((a, b) => a + b.h, 0) + P * 1.5;
   c.width = W; c.height = H;
