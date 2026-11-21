@@ -255,6 +255,17 @@ function renderTop() {
   const st = S.lib.stats;
   $("#tagline").innerHTML = `<b>${st.families.toLocaleString()}</b> families · <b>${st.faces.toLocaleString()}</b> styles · ${fmtBytes(st.bytes)}`;
   shuffleWordmark(false);
+  renderFooter();
+}
+function renderFooter() {
+  const st = S.lib.stats;
+  const scan = S.lib.scan;
+  if (S.lib.version) $("#foot-version").textContent = `v${S.lib.version}`;
+  $("#foot-stats").textContent = [
+    plural(st.families, "family"), plural(st.faces, "style"), fmtBytes(st.bytes),
+    scan.scanning ? `indexing ${scan.done}/${scan.total}` : scan.last ? `indexed ${timeAgo(scan.last)}` : "",
+  ].filter(Boolean).join(" · ");
+  if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) $$(".foot-keys kbd.mod").forEach((k) => { k.textContent = "⌘"; });
 }
 function shuffleWordmark(animate = true) {
   const wm = $("#wordmark");
@@ -299,7 +310,7 @@ function renderSide() {
       ${scan.scanning ? `<div>Indexing ${scan.done} / ${scan.total}…</div><div class="bar"><i style="width:${scan.total ? (100 * scan.done / scan.total) : 0}%"></i></div>`
         : `<div>Indexed ${scan.last ? timeAgo(scan.last) : "—"}</div>`}
       <button class="btn small ghost" data-act="rescan" style="align-self:flex-start">${ICON.refresh} Rescan folder</button>
-    </div>`;
+    </div>`;  renderFooter();
 }
 function timeAgo(t) {
   const s = Date.now() / 1000 - t;
