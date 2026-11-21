@@ -25,14 +25,14 @@ a proper type tester, glyph maps, collections and one-click downloads.</p>
   <a href="https://github.com/jatinkrmalik/typestash/commits/main"><img src="https://img.shields.io/github/last-commit/jatinkrmalik/typestash?style=flat-square&color=17140f" alt="Last commit"></a>
 </p>
 
+![Typestash gallery](docs/gallery-light.png)
+
 <p align="center">
   <a href="https://jatinkrmalik.github.io/typestash/"><b>Live demo</b></a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#configuration">Configuration</a> ·
   <a href="#reverse-proxy">Reverse proxy</a>
 </p>
-
-![Typestash gallery](docs/gallery-light.png)
 
 ## Why
 
