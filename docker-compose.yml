@@ -1,0 +1,18 @@
+# Typestash: self-hosted font library.
+# Quick start:  docker compose up -d   then open http://localhost:8080
+services:
+  typestash:
+    image: ghcr.io/jatinkrmalik/typestash:latest
+    container_name: typestash
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./fonts:/fonts     # your font files (scanned recursively; uploads go to fonts/Uploads/<Family>/)
+      - ./data:/data       # index, favourites, collections, notes
+    environment:
+      - PUID=1000          # owner of the files it writes (run `id` on the host)
+      - PGID=1000
+      - TZ=Etc/UTC
+      # - TYPESTASH_PASSWORD=change-me   # turn on a login (user: typestash)
+      # - TYPESTASH_UPLOADS=false        # read-only: no uploads from the browser

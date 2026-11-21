@@ -1,0 +1,15 @@
+# Development: build from source and live-edit app/ without rebuilding.
+#   docker compose -f docker-compose.dev.yml up --build
+services:
+  typestash:
+    build: .
+    image: typestash:dev
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./fonts:/fonts
+      - ./data:/data
+      - ./app:/app:ro
+    environment:
+      - PUID=1000
+      - PGID=1000

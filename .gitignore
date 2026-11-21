@@ -1,0 +1,7 @@
+data/
+fonts/
+_site/
+_fonts/
+.env
+__pycache__/
+*.pyc

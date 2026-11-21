@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>typestash</Name>
+  <Repository>ghcr.io/jatinkrmalik/typestash:latest</Repository>
+  <Registry>https://github.com/jatinkrmalik/typestash/pkgs/container/typestash</Registry>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/jatinkrmalik/typestash/issues</Support>
+  <Project>https://github.com/jatinkrmalik/typestash</Project>
+  <Overview>Self-hosted font library. Point it at a folder of fonts (TTF, OTF, WOFF, WOFF2, TTC or zips) and get a searchable gallery with live previews, a type tester with variable-font axes and OpenType features, glyph maps, pairing, collections, compare, specimen sheets and one-click downloads.</Overview>
+  <Category>MediaServer:Other Tools:</Category>
+  <WebUI>http://[IP]:[PORT:8080]/</WebUI>
+  <Icon>https://raw.githubusercontent.com/jatinkrmalik/typestash/main/app/static/icon-512.png</Icon>
+  <Config Name="Web UI port" Target="8080" Default="8080" Mode="tcp" Description="Port for the web interface" Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+  <Config Name="Fonts" Target="/fonts" Default="/mnt/user/fonts" Mode="rw" Description="Your font folder (scanned recursively). Uploads are filed under Uploads/&lt;Family&gt;/." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/fonts</Config>
+  <Config Name="App data" Target="/data" Default="/mnt/user/appdata/typestash" Mode="rw" Description="Index, favourites, collections and notes" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/typestash</Config>
+  <Config Name="PUID" Target="PUID" Default="99" Description="User ID that owns written files" Type="Variable" Display="advanced" Required="false" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Description="Group ID that owns written files" Type="Variable" Display="advanced" Required="false" Mask="false">100</Config>
+  <Config Name="Password" Target="TYPESTASH_PASSWORD" Default="" Description="Optional. Turns on a login (user: typestash). Leave empty if you use a reverse proxy with its own auth." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="Allow uploads" Target="TYPESTASH_UPLOADS" Default="true" Description="Set to false for a read-only library" Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+</Container>

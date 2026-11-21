@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Typestash</title>
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="static/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="static/apple-touch-icon.png">
+<link rel="stylesheet" href="static/style.css">
+<script>
+  // Set the theme before first paint so there is no flash.
+  try {
+    var t = localStorage.getItem("tc.theme");
+    if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.dataset.theme = t;
+  } catch (e) { document.documentElement.dataset.theme = "light"; }
+</script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#/" aria-label="Home"><span class="wordmark" id="wordmark">Typestash</span></a>
+  <div class="tagline" id="tagline"></div>
+  <div class="top-actions">
+    <button class="btn ghost" id="cmdk-btn" title="Command bar"><span class="lbl-long">Jump to…</span> <kbd>Ctrl K</kbd></button>
+    <button class="icon-btn" id="theme-btn" title="Paper / ink"></button>
+    <button class="btn primary" id="upload-btn" title="Add fonts (or drop them anywhere)"></button>
+    <input type="file" id="file-input" multiple accept=".ttf,.otf,.woff,.woff2,.ttc,.otc,.zip" hidden>
+  </div>
+</header>
+<div class="layout">
+  <nav class="side" id="side"></nav>
+  <main class="main" id="view"></main>
+</div>
+<div class="tray" id="tray" hidden></div>
+<div class="drop" id="drop" hidden><div class="drop-inner"><div class="drop-glyphs" id="drop-glyphs">Aa</div><p>Drop fonts or .zip files to add them</p></div></div>
+<div class="toasts" id="toasts"></div>
+<div class="popmenu" id="menu" hidden></div>
+<div class="palette" id="palette" hidden>
+  <div class="palette-box">
+    <input id="palette-input" placeholder="Jump to a font, collection or action…" autocomplete="off" spellcheck="false">
+    <div class="palette-list" id="palette-list"></div>
+    <div class="palette-foot"><span>↑↓ move</span><span>↵ open</span><span>esc close</span></div>
+  </div>
+</div>
+<script src="static/app.js"></script>
+</body>
+</html>

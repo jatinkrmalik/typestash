@@ -1,0 +1,34 @@
+# Font families for the public demo, as folders in github.com/google/fonts
+# (all SIL Open Font License). One per line; every .ttf in the folder is used.
+ofl/inter
+ofl/fraunces
+ofl/playfairdisplay
+ofl/instrumentserif
+ofl/cormorantgaramond
+ofl/lora
+ofl/librebaskerville
+ofl/dmserifdisplay
+ofl/abrilfatface
+ofl/bricolagegrotesque
+ofl/spacegrotesk
+ofl/syne
+ofl/outfit
+ofl/dmsans
+ofl/archivo
+ofl/jetbrainsmono
+ofl/spacemono
+ofl/ibmplexmono
+ofl/majormonodisplay
+ofl/pacifico
+ofl/caveat
+ofl/dancingscript
+ofl/lobster
+ofl/shrikhand
+ofl/bungee
+ofl/righteous
+ofl/monoton
+ofl/silkscreen
+ofl/pressstart2p
+ofl/rubikmonoone
+ofl/tirodevanagarihindi
+ofl/amiri
