@@ -50,6 +50,9 @@ keeps a small index next to them, so Samba, rsync and your backups keep working.
 
 - **Live gallery.** Every card is set in its own font. Type your own sample text,
   resize, switch grid/list. Hover a card to sweep through its weights.
+- **Preview presets.** One-click sample texts you can save and edit, plus a
+  Scripts menu built from your library: preview Cyrillic, Greek, Arabic,
+  Devanagari and more, and see only the fonts that can render them.
 - **Real metadata.** Reads family, style, weight, width, designer, foundry,
   version, license and language support from inside each font (not the file name).
 - **Smart filters.** Sans, serif, mono, display, script; variable fonts; families
@@ -86,6 +89,8 @@ keeps a small index next to them, so Samba, rsync and your backups keep working.
 - Supports **TTF, OTF, WOFF, WOFF2, TTC/OTC** collections and zips.
 
 ![Family page with type tester](docs/family.png)
+
+![Compare fonts side by side](docs/compare.png)
 
 ## Quick start
 
