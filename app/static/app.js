@@ -685,7 +685,9 @@ function togglePick(key) {
 }
 function renderTray() {
   const tray = $("#tray");
-  if (!S.picks.length || route().name === "compare") { tray.hidden = true; return; }
+  const show = S.picks.length && route().name !== "compare";
+  document.body.classList.toggle("has-tray", !!show);
+  if (!show) { tray.hidden = true; return; }
   tray.hidden = false;
   tray.innerHTML = `<span style="font-size:13px;opacity:.75">Compare</span><div class="picks">${S.picks.map((k) => {
     const f = S.byKey.get(k);
@@ -1795,6 +1797,12 @@ document.addEventListener("click", (e) => {
     location.reload();
   }
 });
+
+// The header's height drives every sticky offset below it.
+const topObs = new ResizeObserver(([e]) => {
+  document.documentElement.style.setProperty("--top-h", `${Math.round(e.target.getBoundingClientRect().height)}px`);
+});
+topObs.observe($(".top"));
 
 // ------------------------------------------------------------------ boot
 (async function boot() {
