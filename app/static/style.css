@@ -858,3 +858,13 @@ textarea.note { width: 100%; min-height: 90px; border: 1px solid var(--line-2); 
 .preset-row .pre-label { width: 160px; flex: none; }
 .preset-row .pre-text { flex: 1; width: auto; }
 @media (max-width: 600px) { .preset-row { flex-direction: row; flex-wrap: wrap; } .preset-row .pre-label { width: 100%; } }
+
+/* compare: every column shares the same rows, so sections line up across fonts */
+.cmp-cols { grid-template-rows: repeat(7, auto); }
+.cmp-col { display: grid; grid-row: span 7; grid-template-rows: subgrid; row-gap: 0; }
+.cmp-add { grid-row: span 7; }
+.cmp-col-foot { margin-top: 0; align-self: end; }
+.cmp-metrics { align-content: start; }
+/* fonts with very tall metrics (e.g. Playwrite "Guides") must not bleed into the next section */
+.cmp-aa, .cmp-headline, .cmp-para, .cmp-set { overflow: hidden; }
+.cmp-aa { line-height: 1.2; }
