@@ -23,6 +23,8 @@ a proper type tester, glyph maps, collections and one-click downloads.</p>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ffc21a?style=flat-square" alt="MIT license"></a>
   <a href="https://github.com/jatinkrmalik/typestash/stargazers"><img src="https://img.shields.io/github/stars/jatinkrmalik/typestash?style=flat-square&color=ff4a1c&logo=github" alt="GitHub stars"></a>
   <a href="https://github.com/jatinkrmalik/typestash/commits/main"><img src="https://img.shields.io/github/last-commit/jatinkrmalik/typestash?style=flat-square&color=17140f" alt="Last commit"></a>
+  <a href="https://github.com/sponsors/jatinkrmalik"><img src="https://img.shields.io/badge/sponsor-%E2%99%A5-f0458f?style=flat-square&logo=githubsponsors&logoColor=white" alt="Sponsor"></a>
+  <a href="https://buymeacoffee.com/jk"><img src="https://img.shields.io/badge/buy%20me%20a-coffee-ffc21a?style=flat-square&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
 </p>
 
 ![Typestash gallery](docs/gallery-light.png)
@@ -220,6 +222,14 @@ python demo/fetch_fonts.py demo/fonts.txt _fonts
 python demo/build_demo.py _fonts _site
 python -m http.server -d _site 8000
 ```
+
+## Support
+
+Typestash is free and open source, built in spare time. If it saves you a hunt
+through old folders for that one font, you can
+[buy me a coffee](https://buymeacoffee.com/jk) or
+[sponsor the project](https://github.com/sponsors/jatinkrmalik) on GitHub. Bug
+reports, ideas and pull requests help just as much.
 
 ## License
 
