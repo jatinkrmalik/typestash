@@ -175,14 +175,11 @@ const SAMPLES = {
   other: "Pack my box with five dozen liquor jugs",
 };
 const SCRIPT_SAMPLE = {
+  "Latin Extended": "Příliš žluťoučký kůň úpěl ďábelské ódy · Łódź · Ærøskøbing",
   Devanagari: "नमस्ते, यह अक्षरों का नमूना है", Bengali: "আমার সোনার বাংলা", Tamil: "யாமறிந்த மொழிகளிலே", Arabic: "نص حكيم له سر قاطع",
   Hebrew: "דג סקרן שט בים מאוכזב", Thai: "เป็นมนุษย์สุดประเสริฐเลิศคุณค่า", CJK: "永和九年，岁在癸丑", Kana: "いろはにほへと ちりぬるを",
   Hangul: "다람쥐 헌 쳇바퀴에 타고파", Greek: "Ξεσκεπάζω την ψυχοφθόρα βδελυγμία", Cyrillic: "Съешь же ещё этих мягких французских булок",
 };
-const PRESETS = [
-  ["Pangram", ""], ["Aa", "Aa Gg Rr"], ["ABC", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"], ["abc", "abcdefghijklmnopqrstuvwxyz"],
-  ["123", "0123456789 $€£₹ %&@#?!"], ["हिन्दी", "नमस्ते दुनिया"],
-];
 const FEATURE_NAMES = {
   liga: "Ligatures", dlig: "Discretionary ligatures", calt: "Contextual alternates", salt: "Stylistic alternates",
   swsh: "Swashes", smcp: "Small caps", c2sc: "Caps to small caps", onum: "Oldstyle figures", lnum: "Lining figures",
@@ -513,7 +510,7 @@ function gallery(r) {
         <div class="field search unified">${ICON.search}<input id="q" placeholder="Filter by name, designer, folder…" value="${esc(S.q)}" autocomplete="off" aria-label="Filter fonts">
           <button type="button" class="cmd-chip" data-act="palette" title="Command bar: actions, themes, links (${MOD_LABEL}+K)"><kbd>${MOD_LABEL}</kbd><kbd>K</kbd><span>Commands</span></button></div>
         <label class="field sample"><input id="sample" placeholder="Type your own preview text…" value="${esc(S.text)}" autocomplete="off">
-          <span class="presets">${PRESETS.map(([l, t], i) => `<button type="button" data-preset="${i}" title="${esc(t || "Category pangrams")}">${esc(l)}</button>`).join("")}</span></label>
+          <span class="presets">${presetsHTML()}</span></label>
         <label class="size-ctl"><span>Aa</span><input type="range" id="size" min="14" max="140" value="${S.size}"><span id="size-v">${S.size}px</span></label>
       </div>
       <div class="chips-row">
@@ -1447,6 +1444,13 @@ function paletteCommands() {
     { g: "Filter", icon: ICON.tag, label: "Families with italics", run: () => goGallery(() => { S.ital = true; }) },
     { g: "Filter", icon: ICON.x, label: "Clear filters", k: "reset all", run: () => goGallery(() => { S.q = ""; S.cat = "all"; S.vf = S.ital = false; S.script = ""; }) },
   );
+  // preview text
+  cmds.push(
+    ...BUILTIN_PRESETS.map(([l, t]) => ({ g: "Preview text", icon: ICON.pen, label: `Preview: ${l === "Pangram" ? "category pangrams" : l}`, k: "sample text preset", run: () => goGallery(() => applyPreset(t)) })),
+    ...customPresets().map((p) => ({ g: "Preview text", icon: ICON.star, label: `Preview: ${p.label}`, k: `sample preset ${p.text}`, run: () => goGallery(() => applyPreset(p.text)) })),
+    ...scriptCounts().map(([sc, cnt]) => ({ g: "Preview text", icon: ICON.tag, label: `Preview in ${sc}`, k: "script language sample", hint: plural(cnt, "family"), run: () => goGallery(() => applyPreset(SCRIPT_SAMPLE[sc], sc)) })),
+    { g: "Preview text", icon: ICON.plus, label: "Save preview text as preset…", k: "preset add", run: savePresetFromText },
+  );
   // themes
   cmds.push(
     { g: "Theme", icon: ICON.palette, label: "Choose theme…", k: "picker gallery appearance colours", run: () => setTimeout(openThemePanel) },
@@ -1615,10 +1619,8 @@ document.addEventListener("click", (e) => {
   }
   const pre = e.target.closest("[data-preset]");
   if (pre) {
-    S.text = PRESETS[Number(pre.dataset.preset)][1];
-    store.set("text", S.text);
-    $("#sample").value = S.text;
-    updateSpecimens();
+    const p = presetByKey(pre.dataset.preset);
+    if (p) applyPreset(p.text);
   }
   const pi = e.target.closest("#palette-list [data-i]");
   if (pi) runPalette(Number(pi.dataset.i));
@@ -1724,7 +1726,7 @@ async function deleteCollection() {
 }
 
 // ------------------------------------------------------------------ settings
-const PREF_KEYS = ["tc.themeMode", "tc.themeLight", "tc.themeDark", "tc.theme", "tc.text", "tc.size", "tc.view", "tc.sort", "tc.picks", "tc.cmpsize"];
+const PREF_KEYS = ["tc.presets", "tc.themeMode", "tc.themeLight", "tc.themeDark", "tc.theme", "tc.text", "tc.size", "tc.view", "tc.sort", "tc.picks", "tc.cmpsize"];
 function settingsPage() {
   const st = S.lib.stats;
   const scan = S.lib.scan;
@@ -1750,6 +1752,12 @@ function settingsPage() {
           <select class="sel" id="set-sort">${[["az", "A → Z"], ["new", "Newest"], ["styles", "Most styles"], ["shuffle", "Shuffle"]].map(([v, l]) =>
             `<option value="${v}" ${S.sort === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
       </div>
+    </section>
+
+    <section class="set-sec"><h2>// preview presets</h2>
+      <p class="set-note">One-click sample texts next to the preview field and in the command bar. The <b>Scripts</b> menu is built from the writing systems your library covers.</p>
+      <div class="set-rows" id="preset-rows">${presetRowsHTML()}</div>
+      <button class="btn small" data-act="addpreset" style="margin-top:10px">${ICON.plus} Add preset</button>
     </section>
 
     <section class="set-sec"><h2>// keyboard</h2>
@@ -1803,6 +1811,94 @@ const topObs = new ResizeObserver(([e]) => {
   document.documentElement.style.setProperty("--top-h", `${Math.round(e.target.getBoundingClientRect().height)}px`);
 });
 topObs.observe($(".top"));
+
+// ------------------------------------------------------------------ preview-text presets
+// Built-ins, your own saved presets (localStorage "tc.presets"), and a Scripts menu
+// built from the writing systems the library actually covers.
+const BUILTIN_PRESETS = [
+  ["Pangram", ""], ["Aa", "Aa Gg Rr"], ["ABC", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"], ["abc", "abcdefghijklmnopqrstuvwxyz"],
+  ["123", "0123456789 $€£₹ %&@#?!"],
+];
+const MAX_PRESETS = 12;
+const customPresets = () => store.get("presets", []);
+const savePresets = (list) => store.set("presets", list.slice(0, MAX_PRESETS));
+function scriptCounts() {
+  const c = {};
+  S.families.forEach((f) => f.scripts.forEach((s) => { c[s] = (c[s] || 0) + 1; }));
+  return Object.entries(c).filter(([s]) => SCRIPT_SAMPLE[s]).sort((a, b) => b[1] - a[1]);
+}
+function presetsHTML() {
+  return `<span class="pre-scroll">${BUILTIN_PRESETS.map(([l, t], i) => `<button type="button" data-preset="b${i}" ${i >= 3 ? 'class="pre-x"' : ""} title="${esc(t || "A pangram that suits each category")}">${esc(l)}</button>`).join("")}${
+    customPresets().map((p, i) => `<button type="button" class="pre-custom" data-preset="c${i}" title="${esc(p.text)}">${esc(p.label)}</button>`).join("")}</span>${
+    scriptCounts().length ? `<button type="button" data-act="scriptmenu" title="Sample text in another writing system">Scripts ▾</button>` : ""}<button type="button" class="pre-add" data-act="savepreset" title="Save the current preview text as a preset">＋</button>`;
+}
+function refreshPresets() { $$(".presets").forEach((el) => { el.innerHTML = presetsHTML(); }); }
+// Set the preview text. A script sample also narrows the grid to fonts that can
+// render it; any other preset undoes a narrowing that a script sample made.
+function applyPreset(text, script) {
+  S.text = text;
+  store.set("text", S.text);
+  if ($("#sample")) $("#sample").value = text;
+  const wasByPreset = S.scriptByPreset;
+  if (script) { S.script = script; S.scriptByPreset = true; } else if (wasByPreset) { S.script = ""; S.scriptByPreset = false; }
+  if ($("#grid") && (script || wasByPreset)) refreshGallery();
+  else updateSpecimens();
+}
+function presetByKey(k) {
+  if (k[0] === "b") { const p = BUILTIN_PRESETS[Number(k.slice(1))]; return p && { label: p[0], text: p[1] }; }
+  return customPresets()[Number(k.slice(1))];
+}
+async function savePresetFromText() {
+  const text = (S.text || "").trim();
+  if (!text) { toast("Type some preview text first, then save it."); return; }
+  if (customPresets().length >= MAX_PRESETS) { toast(`You can keep up to ${MAX_PRESETS} presets. Remove one in Settings.`); return; }
+  const label = await askText("Save preview text as…", "Preset name, e.g. Brand", text.slice(0, 14));
+  if (!label) return;
+  savePresets([...customPresets(), { label: label.slice(0, 24), text }]);
+  refreshPresets();
+  toast(`Saved “${label}”. Manage presets in Settings.`);
+}
+function openScriptMenu(anchor) {
+  showMenu(anchor, [{ lbl: "Sample text in" }, ...scriptCounts().map(([s, n]) => ({
+    check: S.scriptByPreset && S.script === s, label: `${s} · ${plural(n, "family")}`, run: () => applyPreset(SCRIPT_SAMPLE[s], s),
+  }))]);
+}
+function presetRowsHTML() {
+  const list = customPresets();
+  return list.length ? list.map((p, i) => `<div class="set-row preset-row" data-pi="${i}">
+      <input class="set-input pre-label" value="${esc(p.label)}" maxlength="24" placeholder="Name" aria-label="Preset name">
+      <input class="set-input pre-text" value="${esc(p.text)}" placeholder="Preview text" aria-label="Preset text">
+      <button type="button" class="icon-btn" data-act="delpreset" data-pi="${i}" title="Remove preset">${ICON.x}</button></div>`).join("")
+    : `<div class="set-row"><span style="color:var(--muted);font-weight:400">No presets yet. Use <b>＋</b> next to the preview text, or add one here.</span></div>`;
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("[data-act]");
+  if (!a) return;
+  if (a.dataset.act === "scriptmenu") openScriptMenu(a);
+  if (a.dataset.act === "savepreset") savePresetFromText();
+  if (a.dataset.act === "addpreset") {
+    if (customPresets().length >= MAX_PRESETS) { toast(`Up to ${MAX_PRESETS} presets.`); return; }
+    savePresets([...customPresets(), { label: "New preset", text: S.text || "Sphinx of black quartz" }]);
+    $("#preset-rows").innerHTML = presetRowsHTML();
+    $$("#preset-rows .pre-label").pop()?.select();
+  }
+  if (a.dataset.act === "delpreset") {
+    const list = customPresets();
+    list.splice(Number(a.dataset.pi), 1);
+    savePresets(list);
+    $("#preset-rows").innerHTML = presetRowsHTML();
+  }
+});
+document.addEventListener("input", (e) => {
+  const row = e.target.closest(".preset-row");
+  if (!row) return;
+  const list = customPresets();
+  const p = list[Number(row.dataset.pi)];
+  if (!p) return;
+  if (e.target.classList.contains("pre-label")) p.label = e.target.value.slice(0, 24) || "Untitled";
+  if (e.target.classList.contains("pre-text")) p.text = e.target.value;
+  savePresets(list);
+});
 
 // ------------------------------------------------------------------ boot
 (async function boot() {
