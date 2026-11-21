@@ -19,6 +19,8 @@ from fontTools.varLib.instancer import instantiateVariableFont
 from PIL import Image, ImageDraw
 
 INK, PAPER, TOMATO = "#17140f", "#f3eee4", "#ff4a1c"
+TILE, LETTERS, OUTLINE = PAPER, INK, INK   # light "paper" icon with an ink hairline
+STROKE = 2         # outline width in viewBox units (0 = none)
 SIZE = 64          # viewBox
 RADIUS = 14
 FONT_PX = 32       # letter size inside the 64 box
@@ -62,8 +64,10 @@ def svg(paths, cursor):
     cx, cy, cw, ch = cursor
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {SIZE} {SIZE}">'
-        f'<rect width="{SIZE}" height="{SIZE}" rx="{RADIUS}" fill="{INK}"/>'
-        f'<path fill="{PAPER}" d="{" ".join(paths)}"/>'
+        + (f'<rect x="{STROKE / 2:g}" y="{STROKE / 2:g}" width="{SIZE - STROKE:g}" height="{SIZE - STROKE:g}" '
+           f'rx="{RADIUS - STROKE / 2:g}" fill="{TILE}" stroke="{OUTLINE}" stroke-width="{STROKE:g}"/>'
+           if STROKE else f'<rect width="{SIZE}" height="{SIZE}" rx="{RADIUS}" fill="{TILE}"/>')
+        + f'<path fill="{LETTERS}" d="{" ".join(paths)}"/>'
         f'<rect x="{cx:.2f}" y="{cy:.2f}" width="{cw:.2f}" height="{ch:.2f}" fill="{TOMATO}"/>'
         "</svg>\n"
     )
@@ -76,7 +80,8 @@ def png(font, out, px):
     k = big / SIZE
     img = Image.new("RGBA", (big, big), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    d.rounded_rectangle((0, 0, big - 1, big - 1), radius=RADIUS * k, fill=INK)
+    d.rounded_rectangle((0, 0, big - 1, big - 1), radius=RADIUS * k, fill=TILE,
+                        outline=OUTLINE if STROKE else None, width=round(STROKE * k))
 
     upm = font["head"].unitsPerEm
     scale = FONT_PX / upm
@@ -101,7 +106,7 @@ def png(font, out, px):
             tmp = Image.new("L", (big, big), 0)
             ImageDraw.Draw(tmp).polygon(pts, fill=255)
             mask = xor(mask, tmp)
-        img.paste(Image.new("RGBA", (big, big), PAPER), (0, 0), mask)
+        img.paste(Image.new("RGBA", (big, big), LETTERS), (0, 0), mask)
     cx, cy, cw, ch = cursor
     d.rectangle((cx * k, cy * k, (cx + cw) * k, (cy + ch) * k), fill=TOMATO)
     img.resize((px, px), Image.LANCZOS).save(out)
