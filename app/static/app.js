@@ -150,6 +150,7 @@ const ICON = {
   pen: '<svg class="i" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>',
   tag: '<svg class="i" viewBox="0 0 24 24"><path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>',
   layers: '<svg class="i" viewBox="0 0 24 24"><path d="m12 4 8.5 4.5L12 13 3.5 8.5z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5"/><path d="m3.5 16.5 8.5 4.5 8.5-4.5"/></svg>',
+  command: '<svg class="i" viewBox="0 0 24 24"><path d="M9 6.5a2.5 2.5 0 1 0-2.5 2.5H17.5A2.5 2.5 0 1 0 15 6.5v11a2.5 2.5 0 1 0 2.5-2.5h-11A2.5 2.5 0 1 0 9 17.5z"/></svg>',
   sidebar: '<svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg>',
   github: '<svg class="i" viewBox="0 0 16 16" style="stroke:none;fill:currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>',
   star: '<svg class="i" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>',
@@ -413,6 +414,7 @@ function renderSide() {
     ${navA("#/compare", ICON.compare, "Compare", S.picks.length || undefined, r.name === "compare")}
     ${navA("#/health", ICON.alert, "Duplicates & issues", (st.duplicates + st.broken) || undefined, r.name === "health")}
     ${navA("#/settings", ICON.gear, "Settings", undefined, r.name === "settings")}
+    <button class="nav" data-act="palette">${ICON.command}<span>Command bar</span><span class="count">${MOD_LABEL} K</span></button>
     <div class="side-foot">
       <div>${plural(st.files, "file")} · ${fmtBytes(st.bytes)}</div>
       ${scan.scanning ? `<div>Indexing ${scan.done} / ${scan.total}…</div><div class="bar"><i style="width:${scan.total ? (100 * scan.done / scan.total) : 0}%"></i></div>`
@@ -508,7 +510,8 @@ function gallery(r) {
           <button class="btn small ghost" data-act="delcoll">${ICON.trash} Delete</button>` : ""}
       </div>` : ""}
       <div class="tool-row">
-        <label class="field search">${ICON.search}<input id="q" placeholder="Search name, designer, folder…" value="${esc(S.q)}" autocomplete="off"><kbd>/</kbd></label>
+        <div class="field search unified">${ICON.search}<input id="q" placeholder="Filter by name, designer, folder…" value="${esc(S.q)}" autocomplete="off" aria-label="Filter fonts">
+          <button type="button" class="cmd-chip" data-act="palette" title="Command bar: actions, themes, links (${MOD_LABEL}+K)"><kbd>${MOD_LABEL}</kbd><kbd>K</kbd><span>Commands</span></button></div>
         <label class="field sample"><input id="sample" placeholder="Type your own preview text…" value="${esc(S.text)}" autocomplete="off">
           <span class="presets">${PRESETS.map(([l, t], i) => `<button type="button" data-preset="${i}" title="${esc(t || "Category pangrams")}">${esc(l)}</button>`).join("")}</span></label>
         <label class="size-ctl"><span>Aa</span><input type="range" id="size" min="14" max="140" value="${S.size}"><span id="size-v">${S.size}px</span></label>
@@ -566,7 +569,9 @@ function refreshGallery() {
   }
   if (!S.list.length) {
     grid.insertAdjacentHTML("beforeend", `<div class="empty" style="grid-column:1/-1"><div class="big">?</div><h2>Nothing matches</h2>
-      <p>${S.scope.name === "coll" ? "This collection is empty. Add fonts with <b>⋯ → Add to collection</b>." : S.scope.name === "fav" ? "Tap the ♥ on fonts you love and they'll live here." : "Try a different search or clear the filters."}</p></div>`);
+      <p>${S.scope.name === "coll" ? "This collection is empty. Add fonts with <b>⋯ → Add to collection</b>." : S.scope.name === "fav" ? "Tap the ♥ on fonts you love and they'll live here." : "No font matches. Try a different word or clear the filters."}</p>
+      ${S.q.trim() ? `<div class="cmp-starters"><button class="btn" data-act="palette">${ICON.command} Run “${esc(S.q.trim())}” as a command <kbd>${MOD_LABEL} K</kbd></button>
+        <button class="btn ghost" data-act="clear">${ICON.x} Clear filters</button></div>` : ""}</div>`);
     return;
   }
   moreCards();
@@ -1590,6 +1595,7 @@ document.addEventListener("click", (e) => {
     else if (a === "clear") { S.q = ""; S.cat = "all"; S.vf = S.ital = false; S.script = ""; gallery(S.scope); }
     else if (a === "clearpicks") { S.picks = []; store.set("picks", []); renderTray(); renderSide(); if (route().name === "compare") comparePage(); else $$(".card.picked").forEach((c) => { c.classList.remove("picked"); $("[data-act=pick]", c).classList.remove("on"); }); }
     else if (a === "cmpadd") openPalette("", true);
+    else if (a === "palette") openPalette($("#q") ? $("#q").value : "");
     else if (a === "renamecoll") renameCollection();
     else if (a === "delcoll") deleteCollection();
     return;
@@ -1639,7 +1645,7 @@ document.addEventListener("mouseover", (e) => {
 });
 document.addEventListener("keydown", (e) => {
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
-  if (isPaletteKey(e)) { e.preventDefault(); $("#palette").hidden ? openPalette() : closePalette(); return; }
+  if (isPaletteKey(e)) { e.preventDefault(); $("#palette").hidden ? openPalette(document.activeElement && document.activeElement.id === "q" ? $("#q").value : "") : closePalette(); return; }
   if (!$("#palette").hidden) {
     if (e.key === "Escape") closePalette();
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -1663,7 +1669,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "," && !e.ctrlKey && !e.metaKey) location.hash = "#/settings";
   if (e.key === "[" && !e.ctrlKey && !e.metaKey && !e.altKey) toggleSidebar();
 });
-$("#cmdk-btn").addEventListener("click", () => openPalette());
 $("#side-btn").innerHTML = ICON.sidebar;
 $("#side-btn").addEventListener("click", () => toggleSidebar());
 toggleSidebar(store.get("sideCollapsed", false));
