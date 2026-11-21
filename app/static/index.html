@@ -27,10 +27,11 @@
 </head>
 <body>
 <header class="top">
+  <button class="icon-btn" id="side-btn" aria-controls="side" aria-expanded="true" title="Hide sidebar  ["></button>
   <a class="brand" href="#/" aria-label="Home"><span class="wordmark" id="wordmark">Typestash</span></a>
   <div class="tagline" id="tagline"></div>
   <div class="top-actions">
-    <button class="btn ghost" id="cmdk-btn" title="Command bar"><span class="lbl-long">Jump to…</span> <kbd>Ctrl K</kbd></button>
+    <button class="btn ghost" id="cmdk-btn" title="Command bar"><span class="lbl-long">Commands</span> <kbd><span class="mod">Ctrl</span> K</kbd></button>
     <button class="icon-btn" id="theme-btn" title="Theme" aria-haspopup="dialog"></button>
     <button class="btn primary" id="upload-btn" title="Add fonts (or drop them anywhere)"></button>
     <input type="file" id="file-input" multiple accept=".ttf,.otf,.woff,.woff2,.ttc,.otc,.zip" hidden>
@@ -64,7 +65,8 @@
           <h3>// keys</h3>
           <dl>
             <div><dt><kbd>/</kbd></dt><dd>search</dd></div>
-            <div><dt><kbd class="mod">Ctrl</kbd><kbd>K</kbd></dt><dd>jump anywhere</dd></div>
+            <div><dt><kbd class="mod">Ctrl</kbd><kbd>K</kbd></dt><dd>command bar</dd></div>
+            <div><dt><kbd>[</kbd></dt><dd>sidebar</dd></div>
             <div><dt><kbd>d</kbd></dt><dd>paper / ink</dd></div>
             <div><dt><kbd>Esc</kbd></dt><dd>go back</dd></div>
           </dl>
@@ -85,7 +87,7 @@
 <div class="theme-panel" id="theme-panel" role="dialog" aria-label="Theme" hidden></div>
 <div class="palette" id="palette" hidden>
   <div class="palette-box">
-    <input id="palette-input" placeholder="Jump to a font, collection or action…" autocomplete="off" spellcheck="false">
+    <input id="palette-input" placeholder="Type a command, or search fonts…" autocomplete="off" spellcheck="false">
     <div class="palette-list" id="palette-list"></div>
     <div class="palette-foot"><span>↑↓ move</span><span>↵ open</span><span>esc close</span></div>
   </div>

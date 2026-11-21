@@ -150,6 +150,10 @@ const ICON = {
   pen: '<svg class="i" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>',
   tag: '<svg class="i" viewBox="0 0 24 24"><path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>',
   layers: '<svg class="i" viewBox="0 0 24 24"><path d="m12 4 8.5 4.5L12 13 3.5 8.5z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5"/><path d="m3.5 16.5 8.5 4.5 8.5-4.5"/></svg>',
+  sidebar: '<svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg>',
+  github: '<svg class="i" viewBox="0 0 16 16" style="stroke:none;fill:currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>',
+  star: '<svg class="i" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>',
+  coffee: '<svg class="i" viewBox="0 0 20 20"><path d="M4 8.5h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5v2M12 3.5v2"/></svg>',
   palette: '<svg class="i" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.6 0-.9.7-1.5 1.7-1.5h2.2a3.8 3.8 0 0 0 3.8-3.8C20.5 6.6 16.7 3.5 12 3.5z"/><circle cx="7.6" cy="11" r="1.1"/><circle cx="10" cy="7.3" r="1.1"/><circle cx="14.6" cy="7.4" r="1.1"/></svg>',
   gear: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.5 7.5 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4z"/></svg>',
   open: '<svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg>',
@@ -268,7 +272,7 @@ function renderFooter() {
     plural(st.families, "family"), plural(st.faces, "style"), fmtBytes(st.bytes),
     scan.scanning ? `indexing ${scan.done}/${scan.total}` : scan.last ? `indexed ${timeAgo(scan.last)}` : "",
   ].filter(Boolean).join(" · ");
-  if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) $$(".foot-keys kbd.mod").forEach((k) => { k.textContent = "⌘"; });
+  $$("kbd .mod, kbd.mod").forEach((k) => { k.textContent = MOD_LABEL; });
 }
 function shuffleWordmark(animate = true) {
   const wm = $("#wordmark");
@@ -330,11 +334,11 @@ function applyTheme() {
   btn.title = `Theme: ${t.name}${p.mode === "auto" ? " (matching system)" : ""}`;
   $$(".theme-picker").forEach((el) => { el.outerHTML = themePickerHTML(); });
 }
-function pickTheme(id) {
+function pickTheme(id, force = false) {
   const t = themeById(id);
   if (!t) return;
   rawSet(t.mode === "dark" ? THEME_KEY.dark : THEME_KEY.light, t.id);
-  if (themePrefs().mode !== "auto") rawSet(THEME_KEY.mode, t.mode);
+  if (force || themePrefs().mode !== "auto") rawSet(THEME_KEY.mode, t.mode);
   else if ((t.mode === "dark") !== sysDark.matches) toast(`${t.name} will be used when your system is in ${t.mode} mode`);
   applyTheme();
 }
@@ -419,6 +423,15 @@ function timeAgo(t) {
   if (s < 3600) return `${Math.round(s / 60)} min ago`;
   if (s < 86400) return `${Math.round(s / 3600)} h ago`;
   return `${Math.round(s / 86400)} d ago`;
+}
+
+function toggleSidebar(force) {
+  const layout = document.querySelector(".layout");
+  const collapsed = force !== undefined ? force : !layout.classList.contains("side-collapsed");
+  layout.classList.toggle("side-collapsed", collapsed);
+  store.set("sideCollapsed", collapsed);
+  $("#side-btn").setAttribute("aria-expanded", String(!collapsed));
+  $("#side-btn").title = `${collapsed ? "Show" : "Hide"} sidebar  [`;
 }
 
 // ------------------------------------------------------------------ router
@@ -1336,49 +1349,139 @@ async function healthPage() {
 }
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "untitled";
 
-// ------------------------------------------------------------------ command palette
+// ------------------------------------------------------------------ command palette (action bar)
+// ⌘K on macOS, Super+K on Linux, Ctrl+K on Windows. Ctrl+K is accepted everywhere
+// too, because some Linux desktops keep Super combos for themselves.
+const PLATFORM = (() => {
+  const p = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || "").toLowerCase();
+  if (/mac|iphone|ipad/.test(p)) return "mac";
+  if (/linux|x11|cros/.test(p) && !/android/.test(navigator.userAgent.toLowerCase())) return "linux";
+  return "win";
+})();
+const MOD_LABEL = { mac: "⌘", linux: "Super", win: "Ctrl" }[PLATFORM];
+const isPaletteKey = (e) => e.key && e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey;
+const LINKS = {
+  source: "https://github.com/jatinkrmalik/typestash",
+  bug: "https://github.com/jatinkrmalik/typestash/issues/new",
+  releases: "https://github.com/jatinkrmalik/typestash/releases",
+  docs: "https://github.com/jatinkrmalik/typestash#readme",
+  star: "https://github.com/jatinkrmalik/typestash/stargazers",
+  sponsor: "https://github.com/sponsors/jatinkrmalik",
+  coffee: "https://buymeacoffee.com/jk",
+};
+const openUrl = (u) => window.open(u, "_blank", "noopener");
 const pal = { items: [], sel: 0, pick: false };
 function openPalette(prefill = "", pick = false) {
   closeMenu();
+  $("#theme-panel").hidden = true;
   pal.pick = pick;
-  $("#palette-input").placeholder = pick ? "Add a font to the comparison…" : "Jump to a font, collection or action…";
+  $("#palette-input").placeholder = pick ? "Add a font to the comparison…" : "Type a command, or search fonts…";
   $("#palette").hidden = false;
   const inp = $("#palette-input");
   inp.value = prefill;
   inp.focus();
+  pal.sel = 0;
   drawPalette();
 }
 function closePalette() { $("#palette").hidden = true; }
+function goGallery(fn) {
+  if (!["all", "fav", "recent", "coll"].includes(route().name)) location.hash = "#/";
+  fn();
+  requestAnimationFrame(() => { if ($("#grid")) gallery(S.scope || route()); });
+}
 function paletteCommands() {
-  return [
-    { label: "Add fonts…", hint: "upload", run: () => $("#file-input").click() },
-    { label: "Surprise me", hint: "random font", run: surprise },
-    { label: `Switch to ${document.documentElement.dataset.mode === "dark" ? "light" : "dark"} theme`, hint: "d", run: toggleDark },
-    { label: "Settings", hint: ",", run: () => { location.hash = "#/settings"; } },
-    ...THEMES.map((t) => ({ label: `Theme: ${t.name}`, hint: t.mode, run: () => pickTheme(t.id) })),
-    { label: "All fonts", hint: "go", run: () => { location.hash = "#/"; } },
-    { label: "Favourites", hint: "go", run: () => { location.hash = "#/fav"; } },
-    { label: "Recently added", hint: "go", run: () => { location.hash = "#/recent"; } },
-    { label: "Compare", hint: "go", run: () => { location.hash = "#/compare"; } },
-    { label: "Duplicates & issues", hint: "go", run: () => { location.hash = "#/health"; } },
-    { label: "New collection…", hint: "create", run: () => newCollection() },
-    { label: "Rescan fonts folder", hint: "index", run: rescan },
-    ...S.collections.map((c) => ({ label: `Collection: ${c.name}`, hint: `${c.count} fonts`, run: () => { location.hash = `#/c/${c.id}`; } })),
+  const r = route();
+  const dark = document.documentElement.dataset.mode === "dark";
+  const cur = document.documentElement.dataset.theme;
+  const auto = themePrefs().mode === "auto";
+  const cmds = [
+    // actions
+    { g: "Actions", icon: ICON.plus, label: "Add fonts…", k: "upload import", hint: "drop anywhere", run: () => $("#file-input").click() },
+    { g: "Actions", icon: ICON.dice, label: "Surprise me", k: "random font", run: surprise },
+    { g: "Actions", icon: ICON.palette, label: `Switch to ${dark ? "light" : "dark"} theme`, k: "theme mode toggle", hint: "d", run: toggleDark },
+    { g: "Actions", icon: ICON.sidebar, label: `${document.querySelector(".layout").classList.contains("side-collapsed") ? "Show" : "Hide"} sidebar`, k: "collapse panel", hint: "[", run: toggleSidebar },
+    { g: "Actions", icon: ICON.refresh, label: "Rescan fonts folder", k: "index reload", run: rescan },
+    { g: "Actions", icon: ICON.plus, label: "New collection…", k: "create group", run: () => newCollection() },
+    { g: "Actions", icon: ICON.copy, label: "Copy link to this page", k: "share url", run: () => copy(location.href, "Link copied") },
+    ...(S.picks.length ? [{ g: "Actions", icon: ICON.x, label: "Clear comparison", k: "compare reset", run: () => { S.picks = []; store.set("picks", []); renderTray(); renderSide(); if (route().name === "compare") comparePage(); } }] : []),
   ];
+  // this font (on a family page)
+  if (r.name === "family" && S.byKey.get(r.key)) {
+    const f = S.byKey.get(r.key);
+    cmds.push(
+      { g: `This font · ${f.name}`, icon: ICON.download, label: "Download family (.zip)", run: () => { location.href = U.family(f.key); } },
+      { g: `This font · ${f.name}`, icon: ICON.heart, label: f.favorite ? "Remove from favourites" : "Add to favourites", run: () => toggleFav(f.key) },
+      { g: `This font · ${f.name}`, icon: ICON.compare, label: S.picks.includes(f.key) ? "Remove from compare" : "Add to compare", run: () => togglePick(f.key) },
+      { g: `This font · ${f.name}`, icon: ICON.image, label: "Save specimen PNG", run: () => api(`/api/family/${enc(f.key)}`).then(exportSpecimen) },
+      { g: `This font · ${f.name}`, icon: ICON.copy, label: "Copy font name", run: () => copy(f.name, "Name copied") },
+    );
+  }
+  // go to
+  cmds.push(
+    { g: "Go to", icon: ICON.all, label: "All fonts", run: () => { location.hash = "#/"; } },
+    { g: "Go to", icon: ICON.heart, label: "Favourites", run: () => { location.hash = "#/fav"; } },
+    { g: "Go to", icon: ICON.clock, label: "Recently added", k: "new latest", run: () => { location.hash = "#/recent"; } },
+    { g: "Go to", icon: ICON.compare, label: "Compare", hint: S.picks.length ? `${S.picks.length} picked` : "", run: () => { location.hash = "#/compare"; } },
+    { g: "Go to", icon: ICON.alert, label: "Duplicates & issues", k: "broken health", run: () => { location.hash = "#/health"; } },
+    { g: "Go to", icon: ICON.gear, label: "Settings", k: "preferences options", hint: ",", run: () => { location.hash = "#/settings"; } },
+    ...S.collections.map((c) => ({ g: "Go to", icon: ICON.folder, label: `Collection: ${c.name}`, hint: `${c.count}`, run: () => { location.hash = `#/c/${c.id}`; } })),
+  );
+  // view and filters
+  cmds.push(
+    { g: "View", icon: ICON.grid, label: "Grid view", k: "layout cards", run: () => { S.view = "grid"; store.set("view", "grid"); goGallery(() => {}); } },
+    { g: "View", icon: ICON.list, label: "List view", k: "layout rows", run: () => { S.view = "list"; store.set("view", "list"); goGallery(() => {}); } },
+    ...[["az", "A → Z"], ["new", "Newest first"], ["styles", "Most styles first"], ["shuffle", "Shuffle"]].map(([v, l]) => (
+      { g: "View", icon: ICON.list, label: `Sort: ${l}`, k: "order", run: () => { S.sort = v; S.seed = Math.random(); store.set("sort", v); goGallery(() => {}); } })),
+    ...CATS.map(([c, l]) => ({ g: "Filter", icon: `<span class="pal-sw c-${c}"></span>`, label: `Show ${l.toLowerCase()} fonts`, k: "category filter", run: () => goGallery(() => { S.cat = c; }) })),
+    { g: "Filter", icon: ICON.tag, label: "Variable fonts only", k: "vf axes", run: () => goGallery(() => { S.vf = true; }) },
+    { g: "Filter", icon: ICON.tag, label: "Families with italics", run: () => goGallery(() => { S.ital = true; }) },
+    { g: "Filter", icon: ICON.x, label: "Clear filters", k: "reset all", run: () => goGallery(() => { S.q = ""; S.cat = "all"; S.vf = S.ital = false; S.script = ""; }) },
+  );
+  // themes
+  cmds.push(
+    { g: "Theme", icon: ICON.palette, label: auto ? "Stop matching system theme" : "Match system theme", k: "auto os light dark", run: () => setThemeAuto(!auto) },
+    ...THEMES.map((t) => ({ g: "Theme", icon: `<span class="pal-sw" style="background:${t.c[0]};box-shadow:inset 0 0 0 1px rgba(127,127,127,.35),inset -7px 0 0 ${t.c[3]}"></span>`,
+      label: `Theme: ${t.name}`, k: `${t.mode} colours colors`, hint: cur === t.id ? "current" : t.mode, run: () => { pickTheme(t.id, true); toast(`${t.name} theme`); } })),
+  );
+  // project
+  cmds.push(
+    { g: "Typestash", icon: ICON.github, label: "Source code on GitHub", k: "repo open source", run: () => openUrl(LINKS.source) },
+    { g: "Typestash", icon: ICON.alert, label: "Report a bug", k: "issue problem", run: () => openUrl(LINKS.bug) },
+    { g: "Typestash", icon: ICON.tag, label: "Releases & changelog", k: "version update", hint: S.lib.version ? `v${S.lib.version}` : "", run: () => openUrl(LINKS.releases) },
+    { g: "Typestash", icon: ICON.open, label: "Docs", k: "readme help", run: () => openUrl(LINKS.docs) },
+    { g: "Typestash", icon: ICON.star, label: "Star on GitHub", k: "like", run: () => openUrl(LINKS.star) },
+    { g: "Typestash", icon: ICON.heart, label: "Sponsor on GitHub", k: "support donate fund", run: () => openUrl(LINKS.sponsor) },
+    { g: "Typestash", icon: ICON.coffee, label: "Buy me a coffee", k: "support donate tip", run: () => openUrl(LINKS.coffee) },
+  );
+  return cmds;
 }
 function drawPalette() {
-  const q = $("#palette-input").value.trim().toLowerCase();
-  const fams = (q ? S.families.filter((f) => f._s.includes(q)) : S.families.filter((f) => f.favorite).concat(S.families).slice(0, 0))
-    .sort((a, b) => (b.name.toLowerCase().startsWith(q) - a.name.toLowerCase().startsWith(q)) || a.name.localeCompare(b.name)).slice(0, 30);
-  const cmds = paletteCommands().filter((c) => !q || c.label.toLowerCase().includes(q));
+  const raw = $("#palette-input").value.trim();
+  const q = raw.toLowerCase();
+  const toks = q.split(/\s+/).filter(Boolean);
   const famRun = (f) => pal.pick ? () => { if (!S.picks.includes(f.key)) togglePick(f.key); } : () => { location.hash = `#/f/${enc(f.key)}`; };
-  pal.items = [...fams.map((f) => ({ fam: f, run: famRun(f) })), ...(pal.pick ? [] : cmds)];
-  pal.sel = Math.min(pal.sel, Math.max(0, pal.items.length - 1));
-  if (!q) pal.sel = 0;
-  $("#palette-list").innerHTML = pal.items.map((it, i) => it.fam
-    ? `<div class="it ${i === pal.sel ? "sel" : ""}" data-i="${i}"><span class="pv" data-face="${esc(it.fam.rep)}">Aa</span><span>${esc(it.fam.name)}</span><span class="hint">${esc(CAT_LABEL[it.fam.category])} · ${it.fam.styles}</span></div>`
-    : `<div class="it ${i === pal.sel ? "sel" : ""}" data-i="${i}"><span class="pv" style="font-size:15px;opacity:.6">→</span><span>${esc(it.label)}</span><span class="hint">${esc(it.hint)}</span></div>`).join("")
-    || `<div style="padding:16px;color:var(--muted)">No matches.</div>`;
+  const fams = (toks.length ? S.families.filter((f) => toks.every((t) => f._s.includes(t))) : [])
+    .sort((a, b) => (b.name.toLowerCase().startsWith(q) - a.name.toLowerCase().startsWith(q)) || a.name.localeCompare(b.name))
+    .slice(0, pal.pick ? 40 : 8)
+    .map((f) => ({ g: "Fonts", fam: f, run: famRun(f) }));
+  let items = fams;
+  if (!pal.pick) {
+    const cmds = paletteCommands().filter((c) => toks.every((t) => `${c.label} ${c.k || ""} ${c.g}`.toLowerCase().includes(t)));
+    const search = raw ? [{ g: "Search", icon: ICON.search, label: `Search the library for “${raw}”`, run: () => goGallery(() => { S.q = raw; }) }] : [];
+    // With a query, matching commands come first unless the query names a font.
+    items = toks.length ? (fams.length && !cmds.length ? [...fams, ...search] : [...cmds.slice(0, 14), ...fams, ...search]) : cmds;
+  }
+  pal.items = items;
+  pal.sel = Math.min(pal.sel, Math.max(0, items.length - 1));
+  let lastG = null;
+  $("#palette-list").innerHTML = items.map((it, i) => {
+    const head = it.g !== lastG ? `<div class="pal-group">${esc(it.g)}</div>` : "";
+    lastG = it.g;
+    const row = it.fam
+      ? `<div class="it ${i === pal.sel ? "sel" : ""}" data-i="${i}"><span class="pv" data-face="${esc(it.fam.rep)}">Aa</span><span class="lb">${esc(it.fam.name)}</span><span class="hint">${esc(CAT_LABEL[it.fam.category])} · ${it.fam.styles}</span></div>`
+      : `<div class="it ${i === pal.sel ? "sel" : ""}" data-i="${i}"><span class="pv ic">${it.icon || "→"}</span><span class="lb">${esc(it.label)}</span>${it.hint ? `<span class="hint">${/^[\[,d]$/.test(it.hint) ? `<kbd>${esc(it.hint)}</kbd>` : esc(it.hint)}</span>` : ""}</div>`;
+    return head + row;
+  }).join("") || `<div style="padding:16px;color:var(--muted)">No matches.</div>`;
   $$("#palette-list [data-face]").forEach((el) => applyFace(el, el.dataset.face));
 }
 function runPalette(i) {
@@ -1532,7 +1635,7 @@ document.addEventListener("mouseover", (e) => {
 });
 document.addEventListener("keydown", (e) => {
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#palette").hidden ? openPalette() : closePalette(); return; }
+  if (isPaletteKey(e)) { e.preventDefault(); $("#palette").hidden ? openPalette() : closePalette(); return; }
   if (!$("#palette").hidden) {
     if (e.key === "Escape") closePalette();
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -1554,8 +1657,13 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "/" && $("#q")) { e.preventDefault(); $("#q").focus(); }
   if (e.key === "d" && !e.ctrlKey && !e.metaKey) toggleDark();
   if (e.key === "," && !e.ctrlKey && !e.metaKey) location.hash = "#/settings";
+  if (e.key === "[" && !e.ctrlKey && !e.metaKey && !e.altKey) toggleSidebar();
 });
 $("#cmdk-btn").addEventListener("click", () => openPalette());
+$("#side-btn").innerHTML = ICON.sidebar;
+$("#side-btn").addEventListener("click", () => toggleSidebar());
+toggleSidebar(store.get("sideCollapsed", false));
+$$("kbd .mod, kbd.mod").forEach((k) => { k.textContent = MOD_LABEL; });
 $("#theme-btn").addEventListener("click", openThemePanel);
 $("#upload-btn").innerHTML = `${ICON.plus}<span class="lbl-long">Add fonts</span>`;
 $("#upload-btn").addEventListener("click", () => $("#file-input").click());
@@ -1609,8 +1717,9 @@ const PREF_KEYS = ["tc.themeMode", "tc.themeLight", "tc.themeDark", "tc.theme", 
 function settingsPage() {
   const st = S.lib.stats;
   const scan = S.lib.scan;
-  const mod = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? "⌘" : "Ctrl";
-  const keys = [[["/"], "Search the library"], [[mod, "K"], "Jump to a font, collection or action"], [["d"], "Switch between your light and dark theme"],
+  const mod = MOD_LABEL;
+  const keys = [[["/"], "Search the library"], [[mod, "K"], "Command bar: every action, setting and link"], [["d"], "Switch between your light and dark theme"],
+    [["["], "Show or hide the sidebar"],
     [[","], "Open settings"], [["Esc"], "Close a menu, or go back from a font"], [["↑", "↓", "↵"], "Move and pick in the command bar"]];
   $("#view").innerHTML = `<div class="settings">
     <div class="cmp-head"><h1>Settings</h1><span style="color:var(--muted);font-size:14px">Preferences are saved in this browser</span></div>

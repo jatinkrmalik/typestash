@@ -61,7 +61,8 @@ keeps a small index next to them, so Samba, rsync and your backups keep working.
   sets…), size, leading, tracking, alignment and colour themes.
 - **Glyph map.** Every character in the font. Click to inspect, double-click to copy.
 - **Waterfall, pairing and compare.** See a family at every size, try heading/body
-  pairings with suggestions, and compare up to 8 fonts side by side.
+  pairings with suggestions, and compare up to 8 fonts side by side, in rows, or overlaid on one
+  baseline with x-height, width and other metrics as bars.
 - **Organise.** Favourites, collections (download a whole collection as a zip),
   and searchable notes per family.
 - **Add fonts by dropping them.** Drag fonts or `.zip` archives anywhere on the
@@ -77,8 +78,11 @@ keeps a small index next to them, so Samba, rsync and your backups keep working.
   a light and a dark favourite. Every theme passes WCAG AA contrast for text.
 - **Settings page** for appearance, preview defaults, keyboard shortcuts and
   server info.
-- **Command bar** (`Ctrl/⌘ K`), keyboard shortcuts (`/` search, `d` light/dark,
-  `,` settings, `Esc` back), works on phones.
+- **Command bar** (`⌘K` on macOS, `Super+K` on Linux, `Ctrl+K` on Windows): every
+  action in one place. Jump to fonts and collections, switch themes, change view
+  and filters, rescan, and open the project links.
+- **Keyboard first:** `/` search, `[` sidebar, `d` light/dark, `,` settings,
+  `Esc` back. The sidebar collapses for more room. Works on phones too.
 - Supports **TTF, OTF, WOFF, WOFF2, TTC/OTC** collections and zips.
 
 ![Family page with type tester](docs/family.png)
