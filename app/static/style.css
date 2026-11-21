@@ -502,7 +502,7 @@ textarea.note { width: 100%; min-height: 90px; border: 1px solid var(--line-2); 
 .field.sample input { min-width: 140px; }
 .toolbar { box-shadow: 0 1px 0 var(--line); }
 @media (max-width: 1100px) { .presets .pre-x { display: none; } }
-@media (max-width: 700px) { .chips-row { flex-direction: column-reverse; } .presets { display: none; } }
+@media (max-width: 700px) { .chips-row { flex-direction: column; } .presets { display: none; } }
 @media (max-width: 700px) { .toolbar { position: static; } }
 
 /* demo banner (GitHub Pages build) */
@@ -868,3 +868,10 @@ textarea.note { width: 100%; min-height: 90px; border: 1px solid var(--line-2); 
 /* fonts with very tall metrics (e.g. Playwrite "Guides") must not bleed into the next section */
 .cmp-aa, .cmp-headline, .cmp-para, .cmp-set { overflow: hidden; }
 .cmp-aa { line-height: 1.2; }
+
+/* toolbar order: view toggle sits with size on row 1 */
+.tool-row .view-seg { flex: none; }
+.surprise-btn { height: 40px; border-radius: 12px; }
+.surprise-btn svg.i { transition: transform .35s cubic-bezier(.3, 1.6, .5, 1); }
+.surprise-btn:hover svg.i { transform: rotate(180deg); }
+@media (max-width: 760px) { .surprise-btn span { display: none; } .surprise-btn { padding: 0 10px; } }

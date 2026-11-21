@@ -151,6 +151,7 @@ const ICON = {
   tag: '<svg class="i" viewBox="0 0 24 24"><path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>',
   layers: '<svg class="i" viewBox="0 0 24 24"><path d="m12 4 8.5 4.5L12 13 3.5 8.5z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5"/><path d="m3.5 16.5 8.5 4.5 8.5-4.5"/></svg>',
   command: '<svg class="i" viewBox="0 0 24 24"><path d="M9 6.5a2.5 2.5 0 1 0-2.5 2.5H17.5A2.5 2.5 0 1 0 15 6.5v11a2.5 2.5 0 1 0 2.5-2.5h-11A2.5 2.5 0 1 0 9 17.5z"/></svg>',
+  shuffle: '<svg class="i" viewBox="0 0 24 24"><path d="M3.5 7h3.2c2.2 0 3.5 1 4.8 3l2 3c1.3 2 2.6 3 4.8 3h2.2M3.5 17h3.2c1.6 0 2.7-.5 3.7-1.6M14.6 8.6c1-1.1 2.1-1.6 3.7-1.6h2.2"/><path d="m18 4.5 2.5 2.5L18 9.5M18 13.5l2.5 2.5-2.5 2.5"/></svg>',
   sidebar: '<svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg>',
   github: '<svg class="i" viewBox="0 0 16 16" style="stroke:none;fill:currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>',
   star: '<svg class="i" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>',
@@ -403,15 +404,15 @@ function renderSide() {
     ${navA("#/", ICON.all, "All fonts", st.families, r.name === "all")}
     ${navA("#/fav", ICON.heart, "Favourites", nfav, r.name === "fav")}
     ${navA("#/recent", ICON.clock, "Recently added", undefined, r.name === "recent")}
-    <button class="nav" data-act="surprise">${ICON.dice}<span>Surprise me</span></button>
+    <button class="nav" data-act="surprise">${ICON.shuffle}<span>Surprise me</span></button>
     <h4>Collections <button class="icon-btn" data-act="newcoll" title="New collection" style="width:24px;height:24px">${ICON.plus}</button></h4>
     ${S.collections.length ? S.collections.map((c) => navA(`#/c/${c.id}`, ICON.folder, esc(c.name), c.count, r.name === "coll" && r.id === c.id)).join("")
       : `<div class="side-hint">Group fonts for a project: use <b>⋯</b> on any card.</div>`}
     <h4>Tools</h4>
     ${navA("#/compare", ICON.compare, "Compare", S.picks.length || undefined, r.name === "compare")}
-    ${navA("#/health", ICON.alert, "Duplicates & issues", (st.duplicates + st.broken) || undefined, r.name === "health")}
-    ${navA("#/settings", ICON.gear, "Settings", undefined, r.name === "settings")}
     <button class="nav" data-act="palette">${ICON.command}<span>Command bar</span><span class="count">${MOD_LABEL} K</span></button>
+    ${navA("#/settings", ICON.gear, "Settings", undefined, r.name === "settings")}
+    ${navA("#/health", ICON.alert, "Duplicates & issues", (st.duplicates + st.broken) || undefined, r.name === "health")}
     <div class="side-foot">
       <div>${plural(st.files, "file")} · ${fmtBytes(st.bytes)}</div>
       ${scan.scanning ? `<div>Indexing ${scan.done} / ${scan.total}…</div><div class="bar"><i style="width:${scan.total ? (100 * scan.done / scan.total) : 0}%"></i></div>`
@@ -512,17 +513,17 @@ function gallery(r) {
         <label class="field sample"><input id="sample" placeholder="Type your own preview text…" value="${esc(S.text)}" autocomplete="off">
           <span class="presets">${presetsHTML()}</span></label>
         <label class="size-ctl"><span>Aa</span><input type="range" id="size" min="14" max="140" value="${S.size}"><span id="size-v">${S.size}px</span></label>
+        <div class="seg view-seg" role="group" aria-label="View">
+          <button data-view="grid" class="${S.view === "grid" ? "on" : ""}" title="Grid">${ICON.grid}</button>
+          <button data-view="list" class="${S.view === "list" ? "on" : ""}" title="List">${ICON.list}</button>
+        </div>
       </div>
       <div class="chips-row">
         <div class="chips" id="chips"></div>
         <div class="viewctl">
-          <select class="sel" id="sort" title="Sort" ${r.name === "recent" ? "disabled" : ""}>
+          <select class="sel" id="sort" title="Sort order" ${r.name === "recent" ? "disabled" : ""}>
             ${[["az", "A → Z"], ["new", "Newest"], ["styles", "Most styles"], ["shuffle", "Shuffle"]].map(([v, l]) => `<option value="${v}" ${S.sort === v ? "selected" : ""}>${l}</option>`).join("")}
           </select>
-          <div class="seg" role="group" aria-label="View">
-            <button data-view="grid" class="${S.view === "grid" ? "on" : ""}" title="Grid">${ICON.grid}</button>
-            <button data-view="list" class="${S.view === "list" ? "on" : ""}" title="List">${ICON.list}</button>
-          </div>
         </div>
       </div>
     </div>
@@ -1404,7 +1405,7 @@ function paletteCommands() {
   const cmds = [
     // actions
     { g: "Actions", icon: ICON.plus, label: "Add fonts…", k: "upload import", hint: "drop anywhere", run: () => $("#file-input").click() },
-    { g: "Actions", icon: ICON.dice, label: "Surprise me", k: "random font", run: surprise },
+    { g: "Actions", icon: ICON.shuffle, label: "Surprise me", k: "random font shuffle", run: surprise },
     { g: "Actions", icon: ICON.palette, label: `Switch to ${dark ? "light" : "dark"} theme`, k: "theme mode toggle", hint: "d", run: toggleDark },
     { g: "Actions", icon: ICON.sidebar, label: `${document.querySelector(".layout").classList.contains("side-collapsed") ? "Show" : "Hide"} sidebar`, k: "collapse panel", hint: "[", run: toggleSidebar },
     { g: "Actions", icon: ICON.refresh, label: "Rescan fonts folder", k: "index reload", run: rescan },
@@ -1674,6 +1675,8 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "[" && !e.ctrlKey && !e.metaKey && !e.altKey) toggleSidebar();
 });
 $("#side-btn").innerHTML = ICON.sidebar;
+$("#surprise-btn").insertAdjacentHTML("afterbegin", ICON.shuffle);
+$("#surprise-btn").addEventListener("click", surprise);
 $("#side-btn").addEventListener("click", () => toggleSidebar());
 toggleSidebar(store.get("sideCollapsed", false));
 $$("kbd .mod, kbd.mod").forEach((k) => { k.textContent = MOD_LABEL; });
