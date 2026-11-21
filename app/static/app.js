@@ -329,17 +329,20 @@ function applyTheme() {
   const de = document.documentElement;
   de.dataset.theme = t.id;
   de.dataset.mode = t.mode;
-  const btn = $("#theme-btn");
-  btn.innerHTML = ICON.palette;
-  btn.title = `Theme: ${t.name}${p.mode === "auto" ? " (matching system)" : ""}`;
   $$(".theme-picker").forEach((el) => { el.outerHTML = themePickerHTML(); });
 }
 function pickTheme(id, force = false) {
   const t = themeById(id);
   if (!t) return;
   rawSet(t.mode === "dark" ? THEME_KEY.dark : THEME_KEY.light, t.id);
-  if (force || themePrefs().mode !== "auto") rawSet(THEME_KEY.mode, t.mode);
-  else if ((t.mode === "dark") !== sysDark.matches) toast(`${t.name} will be used when your system is in ${t.mode} mode`);
+  const auto = themePrefs().mode === "auto";
+  if (force || !auto) rawSet(THEME_KEY.mode, t.mode);
+  else if ((t.mode === "dark") !== sysDark.matches) {
+    // Clicking a theme should show it. Matching the system would hide a dark
+    // pick on a light system (and vice versa), so step out of it and say so.
+    rawSet(THEME_KEY.mode, t.mode);
+    toast(`${t.name}. Match system is off; turn it back on to follow your OS.`);
+  }
   applyTheme();
 }
 function setThemeAuto(on) {
@@ -378,15 +381,15 @@ function openThemePanel() {
   if (!panel.hidden) { panel.hidden = true; return; }
   panel.innerHTML = `<div class="tp-head"><b>Theme</b><a href="#/settings" data-close-theme>All settings →</a></div>${themePickerHTML()}`;
   panel.hidden = false;
-  const r = $("#theme-btn").getBoundingClientRect();
+  const r = $(".top").getBoundingClientRect();
   panel.style.top = `${r.bottom + 8}px`;
-  panel.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+  panel.style.right = "16px";
 }
 document.addEventListener("click", (e) => {
   const pick = e.target.closest("[data-theme-pick]");
   if (pick) { pickTheme(pick.dataset.themePick); return; }
   const panel = $("#theme-panel");
-  if (!panel.hidden && (e.target.closest("[data-close-theme]") || (!e.target.closest("#theme-panel") && !e.target.closest("#theme-btn")))) panel.hidden = true;
+  if (!panel.hidden && (e.target.closest("[data-close-theme]") || (!e.target.closest("#theme-panel") && !e.target.closest("[data-open-theme]")))) panel.hidden = true;
 });
 document.addEventListener("change", (e) => { if (e.target.matches("[data-theme-auto]")) setThemeAuto(e.target.checked); });
 
@@ -405,7 +408,7 @@ function renderSide() {
     <button class="nav" data-act="surprise">${ICON.dice}<span>Surprise me</span></button>
     <h4>Collections <button class="icon-btn" data-act="newcoll" title="New collection" style="width:24px;height:24px">${ICON.plus}</button></h4>
     ${S.collections.length ? S.collections.map((c) => navA(`#/c/${c.id}`, ICON.folder, esc(c.name), c.count, r.name === "coll" && r.id === c.id)).join("")
-      : `<div style="padding:4px 10px;font-size:12.5px;color:var(--muted)">Group fonts for a project: use <b>⋯</b> on any card.</div>`}
+      : `<div class="side-hint">Group fonts for a project: use <b>⋯</b> on any card.</div>`}
     <h4>Tools</h4>
     ${navA("#/compare", ICON.compare, "Compare", S.picks.length || undefined, r.name === "compare")}
     ${navA("#/health", ICON.alert, "Duplicates & issues", (st.duplicates + st.broken) || undefined, r.name === "health")}
@@ -1439,6 +1442,7 @@ function paletteCommands() {
   );
   // themes
   cmds.push(
+    { g: "Theme", icon: ICON.palette, label: "Choose theme…", k: "picker gallery appearance colours", run: () => setTimeout(openThemePanel) },
     { g: "Theme", icon: ICON.palette, label: auto ? "Stop matching system theme" : "Match system theme", k: "auto os light dark", run: () => setThemeAuto(!auto) },
     ...THEMES.map((t) => ({ g: "Theme", icon: `<span class="pal-sw" style="background:${t.c[0]};box-shadow:inset 0 0 0 1px rgba(127,127,127,.35),inset -7px 0 0 ${t.c[3]}"></span>`,
       label: `Theme: ${t.name}`, k: `${t.mode} colours colors`, hint: cur === t.id ? "current" : t.mode, run: () => { pickTheme(t.id, true); toast(`${t.name} theme`); } })),
@@ -1664,8 +1668,6 @@ $("#side-btn").innerHTML = ICON.sidebar;
 $("#side-btn").addEventListener("click", () => toggleSidebar());
 toggleSidebar(store.get("sideCollapsed", false));
 $$("kbd .mod, kbd.mod").forEach((k) => { k.textContent = MOD_LABEL; });
-$("#theme-btn").addEventListener("click", openThemePanel);
-$("#upload-btn").innerHTML = `${ICON.plus}<span class="lbl-long">Add fonts</span>`;
 $("#upload-btn").addEventListener("click", () => $("#file-input").click());
 $("#wordmark").addEventListener("click", () => shuffleWordmark(true));
 
@@ -1677,17 +1679,19 @@ addEventListener("dragenter", (e) => {
   e.preventDefault();
   if (dragDepth++ === 0) {
     $("#drop").hidden = false;
+    $("#upload-btn").classList.add("dragging");
     const f = S.families[Math.floor(Math.random() * S.families.length)];
     if (f) applyFace($("#drop-glyphs"), f.rep);
   }
 });
 addEventListener("dragover", (e) => { if (hasFiles(e)) e.preventDefault(); });
-addEventListener("dragleave", (e) => { if (hasFiles(e) && --dragDepth <= 0) { dragDepth = 0; $("#drop").hidden = true; } });
+addEventListener("dragleave", (e) => { if (hasFiles(e) && --dragDepth <= 0) { dragDepth = 0; $("#drop").hidden = true; $("#upload-btn").classList.remove("dragging"); } });
 addEventListener("drop", (e) => {
   if (!hasFiles(e)) return;
   e.preventDefault();
   dragDepth = 0;
   $("#drop").hidden = true;
+  $("#upload-btn").classList.remove("dragging");
   uploadFiles(e.dataTransfer.files);
 });
 
