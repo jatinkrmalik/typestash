@@ -374,7 +374,14 @@ button.tag { border: 0; cursor: pointer; }
 .kv dd { margin: 0; overflow-wrap: anywhere; }
 .license { font-size: 12.5px; color: var(--ink-2); max-height: 180px; overflow: auto; white-space: pre-wrap; }
 .files { font: 12.5px var(--mono); display: flex; flex-direction: column; gap: 6px; }
-.files a { display: flex; gap: 8px; text-decoration: none; align-items: center; }
+.files a { display: flex; gap: 8px; text-decoration: none; align-items: flex-start; min-width: 0; }
+.files a svg.i { margin-top: 1px; }
+.files .fp { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.files .fp b { font-weight: 600; overflow-wrap: anywhere; }
+.files .fp small { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.files span.sz { flex: none; }
+.about > .box, .about > * { min-width: 0; }      /* long names must not widen the grid columns */
+.box .license, .kv dd { overflow-wrap: anywhere; }
 .files a:hover { color: var(--accent); }
 .files span.sz { margin-left: auto; color: var(--muted); }
 textarea.note { width: 100%; min-height: 90px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--paper); padding: 10px; resize: vertical; }
