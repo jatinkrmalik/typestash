@@ -149,6 +149,7 @@ const ICON = {
   trash: '<svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>',
   pen: '<svg class="i" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>',
   tag: '<svg class="i" viewBox="0 0 24 24"><path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>',
+  layers: '<svg class="i" viewBox="0 0 24 24"><path d="m12 4 8.5 4.5L12 13 3.5 8.5z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5"/><path d="m3.5 16.5 8.5 4.5 8.5-4.5"/></svg>',
   palette: '<svg class="i" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.6 0-.9.7-1.5 1.7-1.5h2.2a3.8 3.8 0 0 0 3.8-3.8C20.5 6.6 16.7 3.5 12 3.5z"/><circle cx="7.6" cy="11" r="1.1"/><circle cx="10" cy="7.3" r="1.1"/><circle cx="14.6" cy="7.4" r="1.1"/></svg>',
   gear: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.5 7.5 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4z"/></svg>',
   open: '<svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg>',
@@ -1141,31 +1142,180 @@ function wrap(g, text, x, y, maxW, lh) {
 }
 
 // ------------------------------------------------------------------ compare
-function comparePage() {
-  renderTray();
-  const fams = S.picks.map((k) => S.byKey.get(k)).filter(Boolean);
-  const size = store.get("cmpsize", 48);
-  $("#view").innerHTML = `
-    <div class="cmp-head"><h1>Compare</h1><span style="color:var(--muted);font-size:14px">${fams.length ? `${plural(fams.length, "font")} side by side` : ""}</span></div>
-    <div class="tool-row" style="margin-top:6px">
-      <label class="field sample"><input id="c-text" placeholder="Type to compare…" value="${esc(S.text || "Handgloves & Hamburgefonstiv 0123")}"></label>
-      <label class="size-ctl"><span>Aa</span><input type="range" id="c-size" min="14" max="160" value="${size}"><span id="c-size-v">${size}px</span></label>
-      <button class="btn" data-act="cmpadd">${ICON.plus} Add font</button>
-      ${fams.length ? `<button class="btn ghost" data-act="clearpicks">Clear</button>` : ""}
-    </div>
-    <div class="cmp-rows" id="c-rows">${fams.length ? fams.map((f) => `<div class="cmp-row c-${f.category}">
-      <header><a href="#/f/${enc(f.key)}">${esc(f.name)}</a><span class="tag">${CAT_LABEL[f.category]}</span><span style="color:var(--muted)">${esc(f.designer || "")}</span>
-        <button class="icon-btn" data-unpick="${esc(f.key)}" title="Remove">${ICON.x}</button></header>
-      <div class="specimen" data-face="${esc(f.rep)}" style="font-size:${size}px">${esc(S.text || "Handgloves & Hamburgefonstiv 0123")}</div></div>`).join("")
-      : `<div class="empty"><div class="big">⇆</div><h2>Nothing to compare yet</h2><p>Click the ${ICON.compare.replace('class="i"', 'class="i" style="vertical-align:-3px"')} button on up to 8 fonts in the library, or add one here.</p></div>`}</div>`;
-  observeFaces($("#view"));
-  $("#c-text").addEventListener("input", (e) => $$("#c-rows .specimen").forEach((el) => { el.textContent = e.target.value; }));
-  $("#c-size").addEventListener("input", (e) => {
-    $("#c-size-v").textContent = `${e.target.value}px`;
-    store.set("cmpsize", Number(e.target.value));
-    $$("#c-rows .specimen").forEach((el) => { el.style.fontSize = `${e.target.value}px`; });
+const CMP_COLORS = ["var(--accent)", "var(--blue)", "var(--green)", "var(--purple)", "var(--pink)", "var(--yellow)", "var(--gray)", "var(--ink-2)"];
+const CMP_PARA = "Typography is the craft of endowing human language with a durable visual form. Good type is invisible until it isn't, and then it is all anyone sees.";
+const CMP_METRICS = [
+  ["x_height", "x-height", (m) => m.x_height, (v) => v.toFixed(3)],
+  ["cap_height", "Cap height", (m) => m.cap_height, (v) => v.toFixed(3)],
+  ["ascender", "Ascender", (m) => m.ascender, (v) => v.toFixed(3)],
+  ["descender", "Descender", (m) => m.descender, (v) => v.toFixed(3)],
+  ["width", "Avg width", (m) => m.width, (v) => v.toFixed(3)],
+  ["glyphs", "Glyphs", (m, f) => f.glyphs, (v) => v.toLocaleString()],
+  ["styles", "Styles", (m, f) => (f.variable ? null : f.styles), (v) => String(v)],
+];
+const C = Object.assign({ view: "cols", size: 48, weight: 0, text: "" }, store.get("cmp", {}));
+const saveCmp = debounce(() => store.set("cmp", C), 300);
+const cmpText = () => C.text || S.text || "Handgloves & quirky jive";
+const cmpWord = () => (cmpText().trim().split(" ")[0] || "Handgloves").slice(0, 16);
+
+// The face (and variation setting) that best shows weight w; 0 means the family's own regular.
+function cmpFace(f, w) {
+  const ax = wghtAxis(f);
+  if (ax) {
+    const v = w ? Math.min(ax.max, Math.max(ax.min, w)) : null;
+    return { id: f.rep, vs: v ? `'wght' ${v}` : "", label: `variable · wght ${Math.round(v || ax.default)}${w && v !== w ? " ≈" : ""}` };
+  }
+  if (!w) {
+    const r = f.faces.find((x) => x.id === f.rep) || f.faces[0];
+    return { id: f.rep, vs: "", label: `${r.style} ${r.weight}` };
+  }
+  const pool = f.faces.filter((x) => !x.italic).length ? f.faces.filter((x) => !x.italic) : f.faces;
+  const best = pool.reduce((a, b) => (Math.abs(b.weight - w) < Math.abs(a.weight - w) ? b : a));
+  return { id: best.id, vs: "", label: `${best.style} ${best.weight}${best.weight !== w ? " ≈" : ""}` };
+}
+function applyCmpFace(el, face) {
+  loadFace(face.id).then((ok) => {
+    if (ok) el.style.fontFamily = ff(face.id);
+    el.style.fontVariationSettings = face.vs;
+    el.classList.add("ready");
   });
 }
+function cmpFamilies() { return S.picks.map((k) => S.byKey.get(k)).filter(Boolean); }
+
+function comparePage() {
+  renderTray();
+  const fams = cmpFamilies();
+  const views = [["cols", ICON.compare, "Side by side"], ["rows", ICON.list, "Rows"], ["overlay", ICON.layers, "Overlay"]];
+  $("#view").innerHTML = `<div class="cmp">
+    <div class="cmp-head"><h1>Compare</h1>
+      <span class="cmp-count">${fams.length ? plural(fams.length, "font") : "Pick up to 8 fonts"}</span>
+      <div class="seg cmp-views" role="group" aria-label="View">${views.map(([v, ic, l]) =>
+        `<button type="button" data-cmp-view="${v}" class="${C.view === v ? "on" : ""}" title="${l}">${ic}<span>${l}</span></button>`).join("")}</div>
+    </div>
+    <div class="cmp-bar">
+      <label class="field sample"><input id="c-text" placeholder="Type to compare…" value="${esc(C.text)}" autocomplete="off"></label>
+      <label class="size-ctl" title="Size"><span>Aa</span><input type="range" id="c-size" min="16" max="180" value="${C.size}"><span id="c-size-v">${C.size}px</span></label>
+      <label class="size-ctl" title="Weight for every font"><span>Wt</span><input type="range" id="c-weight" min="0" max="900" step="50" value="${C.weight}"><span id="c-weight-v">${C.weight || "auto"}</span></label>
+      <button class="btn" data-act="cmpadd" ${fams.length >= 8 ? "disabled" : ""}>${ICON.plus} Add</button>
+      ${fams.length ? `<button class="btn ghost" data-act="clearpicks">Clear</button>` : ""}
+    </div>
+    <div id="cmp-body" style="--cs:${C.size}px">${fams.length ? cmpBody(fams) : cmpEmpty()}</div>
+  </div>`;
+  paintCmp();
+}
+function cmpEmpty() {
+  const favs = S.families.filter((f) => f.favorite).length;
+  return `<div class="empty cmp-empty"><div class="big">Aa ⇆ Aa</div><h2>Put fonts head to head</h2>
+    <p>Use ${ICON.compare.replace('class="i"', 'class="i" style="vertical-align:-3px"')} on any font card, or start with one of these:</p>
+    <div class="cmp-starters">
+      ${favs >= 2 ? `<button class="btn" data-cmp-start="favs">${ICON.heart} Your favourites</button>` : ""}
+      <button class="btn" data-cmp-start="mix">Serif vs sans vs mono</button>
+      <button class="btn" data-cmp-start="random">${ICON.dice} 3 random fonts</button>
+      <button class="btn ghost" data-act="cmpadd">${ICON.plus} Pick fonts</button>
+    </div></div>`;
+}
+function cmpBody(fams) {
+  if (C.view === "rows") return `<div class="cmp-rows2">${fams.map((f, i) => `
+    <div class="cmp-row2" style="--k:${CMP_COLORS[i]}" data-key="${esc(f.key)}">
+      <div class="cmp-row2-meta"><span class="cmp-dot"></span><a href="#/f/${enc(f.key)}">${esc(f.name)}</a>
+        <small data-cmp-wlabel></small>${cmpActions(f, i, fams.length)}</div>
+      <div class="cmp-row2-sample" data-cmp-face data-cmp-text>${esc(cmpText())}</div></div>`).join("")}</div>`;
+  if (C.view === "overlay") return `<div class="cmp-overlay">
+      <div class="cmp-legend">${fams.map((f, i) => `<button type="button" class="cmp-chip on" style="--k:${CMP_COLORS[i]}" data-cmp-layer="${i}"><span class="cmp-dot"></span>${esc(f.name)}<small data-cmp-wlabel data-key="${esc(f.key)}"></small></button>`).join("")}</div>
+      <div class="cmp-stage"><div class="cmp-stack"><span class="cmp-baseline" aria-hidden="true"></span>${fams.map((f, i) => `<span class="cmp-layer" style="--k:${CMP_COLORS[i]}" data-key="${esc(f.key)}" data-layer="${i}" data-cmp-face data-cmp-word>${esc(cmpWord())}</span>`).join("")}</div></div>
+      <p class="cmp-hint">The first word of your text, every font at the same size on one baseline (the line). Hover a font in the legend to isolate it, click to hide it.</p>
+    </div>`;
+  const max = {};
+  CMP_METRICS.forEach(([k, , get]) => { max[k] = Math.max(...fams.map((f) => get(f.metrics || {}, f) || 0)); });
+  return `<div class="cmp-cols">${fams.map((f, i) => {
+    const m = f.metrics || {};
+    return `<article class="cmp-col c-${f.category}" style="--k:${CMP_COLORS[i]}" data-key="${esc(f.key)}">
+      <header class="cmp-col-head">
+        <div class="cmp-col-title"><span class="cmp-dot"></span><a href="#/f/${enc(f.key)}">${esc(f.name)}</a>${cmpActions(f, i, fams.length)}</div>
+        <div class="cmp-col-sub"><span class="tag">${CAT_LABEL[f.category]}</span><small data-cmp-wlabel></small></div>
+      </header>
+      <div class="cmp-aa" data-cmp-face>Aa</div>
+      <div class="cmp-headline" data-cmp-face data-cmp-text>${esc(cmpText())}</div>
+      <p class="cmp-para" data-cmp-face>${esc(CMP_PARA)}</p>
+      <div class="cmp-set" data-cmp-face>ABCDEFGHIJKLM<br>NOPQRSTUVWXYZ<br>abcdefghijklm<br>nopqrstuvwxyz<br>0123456789 &amp;?!@#</div>
+      <dl class="cmp-metrics">${CMP_METRICS.map(([k, label, get, fmt]) => {
+        const v = get(m, f);
+        if (v === null || v === undefined || (!v && k !== "descender")) return `<div><dt>${label}</dt><dd><span class="bar"></span><code>${k === "styles" && f.variable ? "variable" : "—"}</code></dd></div>`;
+        return `<div><dt>${label}</dt><dd><span class="bar"><i style="width:${max[k] ? Math.max(4, (v / max[k]) * 100) : 0}%"></i></span><code>${fmt(v)}</code></dd></div>`;
+      }).join("")}</dl>
+      <footer class="cmp-col-foot">${esc(f.designer || f.foundry || "")}</footer>
+    </article>`;
+  }).join("")}${fams.length < 8 ? `<button type="button" class="cmp-add" data-act="cmpadd">${ICON.plus}<span>Add a font</span></button>` : ""}</div>`;
+}
+function cmpActions(f, i, n) {
+  return `<span class="cmp-actions">
+    <button type="button" class="icon-btn" data-cmp-move="-1" data-key="${esc(f.key)}" title="Move left" ${i === 0 ? "disabled" : ""}>${ICON.back}</button>
+    <button type="button" class="icon-btn flip" data-cmp-move="1" data-key="${esc(f.key)}" title="Move right" ${i === n - 1 ? "disabled" : ""}>${ICON.back}</button>
+    <button type="button" class="icon-btn" data-unpick="${esc(f.key)}" title="Remove">${ICON.x}</button></span>`;
+}
+// Apply the right face to every specimen and label it.
+function paintCmp() {
+  const body = $("#cmp-body");
+  if (!body) return;
+  cmpFamilies().forEach((f) => {
+    const face = cmpFace(f, C.weight);
+    $$(`[data-key="${CSS.escape(f.key)}"]`, body).forEach((scope) => {
+      const els = scope.matches("[data-cmp-face]") ? [scope] : $$("[data-cmp-face]", scope);
+      els.forEach((el) => applyCmpFace(el, face));
+      $$("[data-cmp-wlabel]", scope).forEach((l) => { l.textContent = face.label; });
+      if (scope.matches("[data-cmp-wlabel]")) scope.textContent = face.label;
+    });
+  });
+}
+function startCompare(kind) {
+  const pickN = (arr, n) => [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+  let keys = [];
+  if (kind === "favs") keys = S.families.filter((f) => f.favorite).map((f) => f.key).slice(0, 8);
+  if (kind === "random") keys = pickN(S.families.filter((f) => f.scripts.includes("Latin")), 3).map((f) => f.key);
+  if (kind === "mix") keys = ["serif", "sans", "mono"].map((c) => pickN(S.families.filter((f) => f.category === c), 1)[0]).filter(Boolean).map((f) => f.key);
+  S.picks = keys;
+  store.set("picks", S.picks);
+  renderSide();
+  comparePage();
+}
+document.addEventListener("input", (e) => {
+  if (!$("#cmp-body")) return;
+  if (e.target.id === "c-text") {
+    C.text = e.target.value;
+    $$("#cmp-body [data-cmp-text]").forEach((el) => { el.textContent = cmpText(); });
+    $$("#cmp-body [data-cmp-word]").forEach((el) => { el.textContent = cmpWord(); });
+    saveCmp();
+  }
+  if (e.target.id === "c-size") { C.size = Number(e.target.value); $("#c-size-v").textContent = `${C.size}px`; $("#cmp-body").style.setProperty("--cs", `${C.size}px`); saveCmp(); }
+  if (e.target.id === "c-weight") { C.weight = Number(e.target.value); $("#c-weight-v").textContent = C.weight || "auto"; paintCmp(); saveCmp(); }
+});
+document.addEventListener("click", (e) => {
+  const v = e.target.closest("[data-cmp-view]");
+  if (v) { C.view = v.dataset.cmpView; saveCmp(); comparePage(); return; }
+  const mv = e.target.closest("[data-cmp-move]");
+  if (mv && !mv.disabled) {
+    const i = S.picks.indexOf(mv.dataset.key);
+    const j = i + Number(mv.dataset.cmpMove);
+    if (i >= 0 && j >= 0 && j < S.picks.length) {
+      [S.picks[i], S.picks[j]] = [S.picks[j], S.picks[i]];
+      store.set("picks", S.picks);
+      comparePage();
+    }
+    return;
+  }
+  const st = e.target.closest("[data-cmp-start]");
+  if (st) { startCompare(st.dataset.cmpStart); return; }
+  const layer = e.target.closest("[data-cmp-layer]");
+  if (layer) {
+    layer.classList.toggle("on");
+    const el = $(`.cmp-layer[data-layer="${layer.dataset.cmpLayer}"]`);
+    if (el) el.hidden = !layer.classList.contains("on");
+  }
+});
+document.addEventListener("mouseover", (e) => {
+  const chip = e.target.closest?.("[data-cmp-layer]");
+  $$(".cmp-layer").forEach((l) => l.classList.toggle("dim", !!chip && l.dataset.layer !== chip.dataset.cmpLayer));
+});
 
 // ------------------------------------------------------------------ health
 async function healthPage() {

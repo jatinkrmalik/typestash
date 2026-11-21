@@ -56,7 +56,7 @@ FONT_EXT = {".ttf", ".otf", ".woff", ".woff2", ".ttc", ".otc"}
 COLLECTION_EXT = {".ttc", ".otc"}
 CATEGORIES = ("sans", "serif", "mono", "display", "script", "symbol", "other")
 __version__ = "0.1.0"   # bump with each release tag
-INDEX_VERSION = "6"   # bump to force a full re-index after parser changes
+INDEX_VERSION = "7"   # bump to force a full re-index after parser changes
 MIME = {".ttf": "font/ttf", ".otf": "font/otf", ".woff": "font/woff", ".woff2": "font/woff2",
         ".ttc": "font/collection", ".otc": "font/collection"}
 STATIC_MIME = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
@@ -80,7 +80,7 @@ with dblock:
         weight INTEGER, width INTEGER, italic INTEGER, mono INTEGER, variable INTEGER,
         axes TEXT, category TEXT, designer TEXT, designer_url TEXT, foundry TEXT,
         license TEXT, license_url TEXT, version TEXT, glyphs INTEGER, chars INTEGER,
-        scripts TEXT, features TEXT, fmt TEXT, size INTEGER, added REAL);
+        scripts TEXT, features TEXT, fmt TEXT, size INTEGER, added REAL, metrics TEXT);
     CREATE INDEX IF NOT EXISTS faces_fkey ON faces(fkey);
     CREATE INDEX IF NOT EXISTS faces_path ON faces(path);
     CREATE TABLE IF NOT EXISTS favorites(fkey TEXT PRIMARY KEY);
@@ -92,6 +92,10 @@ with dblock:
     """)
 
 with dblock:
+    try:
+        db.execute("ALTER TABLE faces ADD COLUMN metrics TEXT")
+    except sqlite3.OperationalError:
+        pass                       # already there
     _v = db.execute("SELECT v FROM meta WHERE k='index_version'").fetchone()
     if not _v or _v[0] != INDEX_VERSION:
         db.execute("DELETE FROM files")
@@ -288,6 +292,40 @@ def categorize(font, family, mono, italic=False):
     return shape or "other"
 
 
+def metrics_of(font, cmap):
+    """Vertical and horizontal proportions as fractions of the em, for comparing fonts."""
+    out = {}
+    try:
+        upm = font["head"].unitsPerEm or 1000
+        os2 = font["OS/2"] if "OS/2" in font else None
+        hhea = font["hhea"] if "hhea" in font else None
+        gs = font.getGlyphSet()
+
+        def top_of(ch):
+            g = cmap.get(ord(ch))
+            if not g:
+                return None
+            from fontTools.pens.boundsPen import BoundsPen
+            bp = BoundsPen(gs)
+            gs[g].draw(bp)
+            return bp.bounds[3] if bp.bounds else None
+
+        xh = getattr(os2, "sxHeight", 0) if os2 is not None and os2.version >= 2 else 0
+        ch = getattr(os2, "sCapHeight", 0) if os2 is not None and os2.version >= 2 else 0
+        xh = xh or top_of("x") or 0
+        ch = ch or top_of("H") or 0
+        asc = (getattr(os2, "sTypoAscender", 0) if os2 is not None else 0) or (hhea.ascent if hhea else 0)
+        desc = (getattr(os2, "sTypoDescender", 0) if os2 is not None else 0) or (hhea.descent if hhea else 0)
+        hmtx = font["hmtx"] if "hmtx" in font else None
+        widths = [hmtx[cmap[c]][0] for c in range(ord("a"), ord("z") + 1) if hmtx and c in cmap]
+        r = lambda v: round(v / upm, 3)  # noqa: E731
+        out = {"upm": upm, "x_height": r(xh), "cap_height": r(ch), "ascender": r(asc),
+               "descender": r(abs(desc)), "width": r(sum(widths) / len(widths)) if widths else 0}
+    except Exception:  # noqa: BLE001 - metrics are nice to have
+        pass
+    return out
+
+
 def describe(font):
     """Everything we index about one face (a TTFont)."""
     family = name_of(font, 16, 1) or "Untitled"
@@ -340,6 +378,7 @@ def describe(font):
         "version": name_of(font, 5), "glyphs": glyphs, "chars": len(cps),
         "scripts": ",".join(scripts_of(cps)),
         "features": ",".join(sorted(feats)),
+        "metrics": json.dumps(metrics_of(font, cmap)),
     }
 
 
@@ -452,6 +491,7 @@ def face_public(r):
     d["axes"] = json.loads(d["axes"]) if d["axes"] else None
     d["scripts"] = [s for s in (d["scripts"] or "").split(",") if s]
     d["features"] = [s for s in (d["features"] or "").split(",") if s]
+    d["metrics"] = json.loads(d["metrics"]) if d.get("metrics") else {}
     d["italic"], d["mono"], d["variable"] = bool(d["italic"]), bool(d["mono"]), bool(d["variable"])
     return d
 
@@ -506,6 +546,8 @@ def family_summary(fkey, faces, cur):
         "italic": any(f["italic"] for f in faces), "mono": any(f["mono"] for f in faces),
         "variable": any(f["variable"] for f in faces),
         "axes": json.loads(rep["axes"]) if rep["axes"] else None,
+        "metrics": json.loads(rep["metrics"]) if rep["metrics"] else {},
+        "glyphs": max(f["glyphs"] or 0 for f in faces),
         "designer": pick("designer"), "foundry": pick("foundry"),
         "license": pick("license")[:160], "scripts": scripts,
         "folder": str(Path(rep["path"]).parent).replace("\\", "/"),
