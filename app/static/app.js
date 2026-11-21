@@ -139,6 +139,7 @@ const ICON = {
   moon: '<svg class="i" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
   back: '<svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
   x: '<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  menu: '<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
   all: '<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>',
   clock: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
   folder: '<svg class="i" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>',
@@ -400,6 +401,7 @@ function renderSide() {
   const navA = (href, icon, label, count, active) =>
     `<a class="nav ${active ? "active" : ""}" href="${href}">${icon}<span>${label}</span>${count !== undefined ? `<span class="count">${count}</span>` : ""}</a>`;
   $("#side").innerHTML = `
+    <div class="drawer-head"><span class="drawer-title">Menu</span><button type="button" class="icon-btn drawer-close" aria-label="Close menu">${ICON.x}</button></div>
     <h4>Library</h4>
     ${navA("#/", ICON.all, "All fonts", st.families, r.name === "all")}
     ${navA("#/fav", ICON.heart, "Favourites", nfav, r.name === "fav")}
@@ -435,9 +437,12 @@ const sideOpen = () => {
   return narrowSide.matches ? layout.classList.contains("drawer-open") : !layout.classList.contains("side-collapsed");
 };
 function syncSideBtn() {
-  const open = sideOpen();
-  $("#side-btn").setAttribute("aria-expanded", String(open));
-  $("#side-btn").title = `${open ? "Hide" : "Show"} sidebar  [`;
+  const open = sideOpen(), btn = $("#side-btn"), phone = narrowSide.matches;
+  btn.setAttribute("aria-expanded", String(open));
+  btn.classList.toggle("menu-btn", phone);
+  btn.innerHTML = phone ? ICON.menu : ICON.sidebar;
+  btn.title = phone ? "Menu" : `${open ? "Hide" : "Show"} sidebar  [`;
+  btn.setAttribute("aria-label", phone ? "Open menu" : "Toggle sidebar");
 }
 function toggleSidebar(force) {
   const layout = document.querySelector(".layout");
@@ -1725,7 +1730,10 @@ $("#side-btn").addEventListener("click", () => toggleSidebar());
 document.querySelector(".layout").classList.toggle("side-collapsed", store.get("sideCollapsed", false));
 syncSideBtn();
 $("#side-scrim").addEventListener("click", closeDrawer);
-$("#side").addEventListener("click", (e) => { if (narrowSide.matches && e.target.closest("a[href], .nav")) setTimeout(closeDrawer, 120); });
+$("#side").addEventListener("click", (e) => {
+  if (e.target.closest(".drawer-close")) return closeDrawer();
+  if (narrowSide.matches && e.target.closest("a[href], .nav")) setTimeout(closeDrawer, 120);
+});
 addEventListener("hashchange", closeDrawer);
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
 $$("kbd .mod, kbd.mod").forEach((k) => { k.textContent = MOD_LABEL; });

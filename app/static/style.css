@@ -867,21 +867,29 @@ textarea.note { width: 100%; min-height: 90px; border: 1px solid var(--line-2); 
    >= 700px (tablets, unfolded foldables): the normal sidebar, a bit narrower.
    <  700px (phones): a drawer that slides in from the left, closed by default. */
 @media (max-width: 1000px) { :root { --side: 212px; } }
-.side-scrim { display: none; }
+.side-scrim, .drawer-head { display: none; }
 @media (max-width: 699.98px) {
   .layout, .layout.side-collapsed { grid-template-columns: 1fr; }
   .layout .side, .layout.side-collapsed .side {
-    position: fixed; z-index: 60; left: 0; top: var(--top-h, 70px); bottom: 0; height: auto;
-    width: min(300px, 84vw); padding: 18px 14px 24px; visibility: hidden;
+    position: fixed; z-index: 70; left: 0; top: 0; bottom: 0; height: auto; align-self: stretch; overflow-y: auto; overscroll-behavior: contain;
+    width: min(300px, 84vw); padding: 12px 14px 24px; visibility: hidden;
     background: var(--paper); border-right: 1px solid var(--line); box-shadow: 0 20px 60px rgba(0,0,0,.18);
     translate: -102% 0; transition: translate .24s ease, visibility 0s .24s;
   }
   .layout.drawer-open .side { visibility: visible; translate: 0 0; transition: translate .24s ease; }
   .side-scrim {
-    display: block; position: fixed; z-index: 59; inset: var(--top-h, 70px) 0 0 0; border: 0; padding: 0;
+    display: block; position: fixed; z-index: 69; inset: 0; border: 0; padding: 0;
     background: rgba(10, 8, 5, .38); opacity: 0; pointer-events: none; transition: opacity .2s;
   }
   .layout.drawer-open .side-scrim { opacity: 1; pointer-events: auto; }
+  .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 0 0 8px 10px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .drawer-title { font: 600 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+  .drawer-close { width: 40px; height: 40px; color: var(--ink); }
+  .drawer-close svg.i { width: 20px; height: 20px; }
+  /* the menu button has to read as a menu: bordered, full-contrast hamburger */
+  #side-btn.menu-btn { width: 40px; height: 40px; border-radius: 12px; border-color: var(--line-2); background: var(--card); color: var(--ink); margin-right: 0; }
+  #side-btn.menu-btn svg.i { width: 20px; height: 20px; }
+  .layout .side .nav { min-height: 44px; font-size: 15px; }
 }
 @media (max-width: 699.98px) and (prefers-reduced-motion: reduce) { .layout .side, .side-scrim { transition: none; } }
 .nav span:not(.count) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
