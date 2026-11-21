@@ -7,6 +7,25 @@ Point it at a folder of fonts and get a searchable gallery with live previews,<b
 a proper type tester, glyph maps, collections and one-click downloads.</p>
 
 <p align="center">
+  <a href="https://github.com/jatinkrmalik/typestash/actions/workflows/docker.yml"><img src="https://github.com/jatinkrmalik/typestash/actions/workflows/docker.yml/badge.svg" alt="Docker image"></a>
+  <a href="https://github.com/jatinkrmalik/typestash/actions/workflows/check.yml"><img src="https://github.com/jatinkrmalik/typestash/actions/workflows/check.yml/badge.svg" alt="Check"></a>
+  <a href="https://github.com/jatinkrmalik/typestash/actions/workflows/pages.yml"><img src="https://github.com/jatinkrmalik/typestash/actions/workflows/pages.yml/badge.svg" alt="Demo site"></a>
+  <br>
+  <a href="https://github.com/jatinkrmalik/typestash/releases"><img src="https://img.shields.io/github/v/release/jatinkrmalik/typestash?style=flat-square&color=ff4a1c&label=release" alt="Latest release"></a>
+  <a href="https://github.com/jatinkrmalik/typestash/pkgs/container/typestash"><img src="https://img.shields.io/badge/ghcr.io-typestash-2f5bff?style=flat-square&logo=docker&logoColor=white" alt="Container image on ghcr.io"></a>
+  <img src="https://img.shields.io/badge/platforms-amd64%20%7C%20arm64-17140f?style=flat-square" alt="Platforms: amd64, arm64">
+  <a href="templates/unraid/typestash.xml"><img src="https://img.shields.io/badge/Unraid-template-f15a2c?style=flat-square&logo=unraid&logoColor=white" alt="Unraid template"></a>
+  <img src="https://img.shields.io/badge/self--hosted-yes-12a36b?style=flat-square&logo=homeassistantcommunitystore&logoColor=white" alt="Self-hosted">
+  <br>
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+">
+  <a href="https://github.com/fonttools/fonttools"><img src="https://img.shields.io/badge/powered%20by-fontTools-8a4dff?style=flat-square" alt="Powered by fontTools"></a>
+  <img src="https://img.shields.io/badge/frontend-no%20build%20step-f0458f?style=flat-square&logo=javascript&logoColor=white" alt="No build step">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ffc21a?style=flat-square" alt="MIT license"></a>
+  <a href="https://github.com/jatinkrmalik/typestash/stargazers"><img src="https://img.shields.io/github/stars/jatinkrmalik/typestash?style=flat-square&color=ff4a1c&logo=github" alt="GitHub stars"></a>
+  <a href="https://github.com/jatinkrmalik/typestash/commits/main"><img src="https://img.shields.io/github/last-commit/jatinkrmalik/typestash?style=flat-square&color=17140f" alt="Last commit"></a>
+</p>
+
+<p align="center">
   <a href="https://jatinkrmalik.github.io/typestash/"><b>Live demo</b></a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#configuration">Configuration</a> ·
