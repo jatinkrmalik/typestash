@@ -55,7 +55,7 @@ CACHE = DATA / "cache"
 FONT_EXT = {".ttf", ".otf", ".woff", ".woff2", ".ttc", ".otc"}
 COLLECTION_EXT = {".ttc", ".otc"}
 CATEGORIES = ("sans", "serif", "mono", "display", "script", "symbol", "other")
-__version__ = "0.2.0"   # bump with each release tag
+__version__ = "0.3.0"   # bump with each release tag
 INDEX_VERSION = "7"   # bump to force a full re-index after parser changes
 MIME = {".ttf": "font/ttf", ".otf": "font/otf", ".woff": "font/woff", ".woff2": "font/woff2",
         ".ttc": "font/collection", ".otc": "font/collection"}
