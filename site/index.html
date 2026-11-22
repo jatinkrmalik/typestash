@@ -129,6 +129,23 @@ p, li { text-wrap: pretty; }
 .frame .bar span { margin: 0 auto; transform: translateX(-24px); font: 12px var(--mono); color: var(--muted); }
 figcaption { margin-top: 16px; font: italic 400 15px/1.4 var(--serif); color: var(--muted); }
 
+/* tour video */
+.tour { padding: 120px 0 0; text-align: center; }
+.tour h2 { font-size: clamp(36px, 5vw, 60px); margin: 14px 0 40px; }
+.video { position: relative; display: block; width: 100%; max-width: 960px; margin: 0 auto; padding: 0; border: 1px solid var(--line-2); border-radius: 14px;
+  overflow: hidden; background: #000; aspect-ratio: 16 / 9; cursor: pointer; box-shadow: var(--shadow); }
+.video img, .video iframe { display: block; width: 100%; height: 100%; border: 0; object-fit: cover; }
+.video .play { position: absolute; left: 50%; top: 82%; translate: -50% -50%; width: 84px; height: 84px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--ink); color: var(--paper); box-shadow: 0 10px 30px rgba(26, 23, 18, .3); transition: scale .15s; }
+.video .play svg { width: 34px; height: 34px; margin-left: 4px; }
+.video:hover .play, .video:focus-visible .play { scale: 1.08; }
+.video:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.video .dur { position: absolute; right: 14px; bottom: 12px; font: 500 13px var(--mono); color: var(--paper); background: rgba(26, 23, 18, .75); padding: 4px 8px; border-radius: 6px; }
+.video.playing { cursor: default; }
+.video-note { margin: 16px 0 0; font-size: 14px; color: var(--muted); }
+.video-note a { color: var(--ink-2); }
+@media (max-width: 640px) { .tour { padding-top: 90px; } .video .play { width: 64px; height: 64px; } .video .play svg { width: 26px; height: 26px; } }
+
 /* problem */
 .problem { padding: 130px 0 20px; text-align: center; overflow: hidden; }
 .problem h2 { font-size: clamp(40px, 6.2vw, 78px); }
@@ -254,6 +271,20 @@ footer .fine a:hover { color: var(--ink); }
       </div>
       <figcaption>The gallery in the Paper theme. Every card is set in its own font.</figcaption>
     </figure>
+  </div>
+</section>
+
+<section class="tour" id="tour">
+  <div class="wrap">
+    <div class="label">The 90-second tour</div>
+    <h2>See it <em>in motion.</em></h2>
+    <!-- Click-to-load: nothing from YouTube is fetched until a visitor presses play. -->
+    <button type="button" class="video" id="video" data-id="99gNLvk2k-0" aria-label="Play the Typestash tour video (1 minute 27 seconds)">
+      <img src="assets/video-poster.jpg" width="1280" height="720" alt="" loading="lazy">
+      <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
+      <span class="dur">1:27</span>
+    </button>
+    <p class="video-note">Plays from YouTube when you press play. Or <a href="https://youtu.be/99gNLvk2k-0">watch it on YouTube</a>.</p>
   </div>
 </section>
 
@@ -409,6 +440,18 @@ footer .fine a:hover { color: var(--ink); }
   const a = files.slice(0, 10), b = files.slice(10);
   document.getElementById("r1").innerHTML = half(a) + half(a);
   document.getElementById("r2").innerHTML = half(b) + half(b);
+
+  const video = document.getElementById("video");
+  video.addEventListener("click", () => {
+    if (video.classList.contains("playing")) return;
+    const f = document.createElement("iframe");
+    f.src = `https://www.youtube-nocookie.com/embed/${video.dataset.id}?autoplay=1&rel=0&modestbranding=1`;
+    f.title = "Typestash: the 90-second tour";
+    f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+    f.allowFullscreen = true;
+    video.replaceChildren(f);
+    video.classList.add("playing");
+  });
 
   document.getElementById("copy").addEventListener("click", async (e) => {
     const text = document.getElementById("cmd").innerText.replace(/^\$ /, "").split("\n# ")[0].trim();

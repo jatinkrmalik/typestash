@@ -1513,6 +1513,7 @@ function paletteCommands() {
   );
   // project
   cmds.push(
+    ...(DEMO ? [{ g: "Typestash", icon: ICON.open, label: "Show the welcome tour", k: "help guide intro walkthrough onboarding", run: () => setTimeout(startTour) }] : []),
     { g: "Typestash", icon: ICON.github, label: "Source code on GitHub", k: "repo open source", run: () => openUrl(LINKS.source) },
     { g: "Typestash", icon: ICON.alert, label: "Report a bug", k: "issue problem", run: () => openUrl(LINKS.bug) },
     { g: "Typestash", icon: ICON.tag, label: "Releases & changelog", k: "version update", hint: S.lib.version ? `v${S.lib.version}` : "", run: () => openUrl(LINKS.releases) },
@@ -1963,6 +1964,103 @@ document.addEventListener("input", (e) => {
   savePresets(list);
 });
 
+
+// ------------------------------------------------------------------ demo welcome tour
+// Shown once, on a visitor's first visit to the demo gallery. Skippable at any step
+// (Skip, Esc, or clicking outside), never shown again after, and replayable from
+// the command bar.
+const TOUR_STEPS = [
+  { title: "Welcome to the Typestash demo",
+    body: () => `This is a real Typestash with ${S.families.length} open-licensed font families. Nothing to install, nothing to sign up for. Want a 30-second tour of where things are?` },
+  { sel: ".field.search", title: "Search and filter",
+    body: () => "Filter by name, designer or folder. The chips below narrow it to sans, serif, mono, script, variable fonts, italics or a writing system." },
+  { sel: ".field.sample", title: "Preview your own words",
+    body: () => "Type anything to see it in every font. Use the presets and the Scripts menu to try Cyrillic, Greek, Devanagari and more, and the slider to resize." },
+  { sel: ".card", title: "Every card is a font",
+    body: () => `Click a card for its type tester, variable axes, glyph map and pairings. ${ICON.compare} adds it to Compare, ${ICON.download} downloads the family.` },
+  { sel: ".cmd-chip", title: "One shortcut for everything",
+    body: () => `Press <kbd>${MOD_LABEL}</kbd> <kbd>K</kbd> to jump to any font, switch between 12 themes, change views and filters. <kbd>/</kbd> searches, <kbd>[</kbd> hides the sidebar.` },
+  { title: "Make it yours",
+    body: () => "Favourites and collections here stay in your browser. To keep your own fonts, run Typestash on your server or NAS with one Docker command.",
+    cta: true },
+];
+let tourStep = -1;
+function tourEl() { return $("#tour"); }
+function endTour() {
+  store.set("welcomed", true);
+  tourStep = -1;
+  tourEl()?.remove();
+  removeEventListener("resize", placeTour);
+  removeEventListener("scroll", placeTour, true);
+}
+function placeTour() {
+  const t = tourEl(), st = TOUR_STEPS[tourStep];
+  if (!t || !st) return;
+  const ring = $(".tour-ring", t), card = $(".tour-card", t);
+  const target = st.sel && $(st.sel);
+  const r = target?.getBoundingClientRect();
+  const visible = r && r.width > 0 && r.bottom > 0 && r.top < innerHeight;
+  t.classList.toggle("tour-dim", !visible);
+  ring.hidden = !visible;
+  if (visible) {
+    const pad = 6;
+    Object.assign(ring.style, { left: `${r.left - pad}px`, top: `${r.top - pad}px`, width: `${r.width + pad * 2}px`, height: `${r.height + pad * 2}px` });
+  }
+  if (innerWidth < 700 || !visible) { card.style.left = card.style.top = ""; card.classList.add("tour-docked"); return; }
+  card.classList.remove("tour-docked");
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  const below = r.bottom + 14 + ch < innerHeight;
+  card.style.top = `${below ? r.bottom + 14 : Math.max(12, r.top - ch - 14)}px`;
+  card.style.left = `${Math.min(innerWidth - cw - 12, Math.max(12, r.left))}px`;
+}
+function showTourStep(i) {
+  tourStep = i;
+  const st = TOUR_STEPS[i], last = i === TOUR_STEPS.length - 1;
+  const target = st.sel && $(st.sel);
+  if (target) target.scrollIntoView({ block: "center", behavior: "instant" });
+  tourEl().innerHTML = `<div class="tour-ring" hidden></div>
+    <div class="tour-card" role="dialog" aria-modal="false" aria-labelledby="tour-title">
+      <div class="tour-count">${i === 0 ? "Live demo" : `${i} of ${TOUR_STEPS.length - 1}`}</div>
+      <h3 id="tour-title">${st.title}</h3>
+      <p>${st.body()}</p>
+      <div class="tour-actions">
+        ${i === 0 ? `<button type="button" class="btn ghost small" data-tour="skip">Skip, I'll explore</button><button type="button" class="btn primary small" data-tour="next">Show me around</button>`
+        : `<button type="button" class="tour-skip" data-tour="skip">${last ? "" : "Skip tour"}</button>
+           <span class="tour-dots">${TOUR_STEPS.slice(1).map((_, k) => `<i class="${k + 1 === i ? "on" : ""}"></i>`).join("")}</span>
+           <button type="button" class="btn ghost small" data-tour="back">Back</button>
+           ${last ? `<a class="btn small" href="${SELF_HOST}" data-tour="done">Self-host it</a><button type="button" class="btn primary small" data-tour="done">Start exploring</button>`
+                  : `<button type="button" class="btn primary small" data-tour="next">Next</button>`}`}
+      </div></div>`;
+  requestAnimationFrame(placeTour);
+  $("[data-tour=next], [data-tour=done]:last-child", tourEl())?.focus();
+}
+function startTour() {
+  if (route().name !== "all") location.hash = "#/";
+  tourEl()?.remove();
+  document.body.insertAdjacentHTML("beforeend", `<div id="tour" class="tour"></div>`);
+  addEventListener("resize", placeTour);
+  addEventListener("scroll", placeTour, true);
+  setTimeout(() => showTourStep(0), route().name === "all" ? 0 : 400);
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-tour]");
+  if (b) {
+    const a = b.dataset.tour;
+    if (a === "next") showTourStep(tourStep + 1);
+    else if (a === "back") showTourStep(Math.max(0, tourStep - 1));
+    else endTour();
+    return;
+  }
+  // clicking anywhere outside the card ends the tour: it should never get in the way
+  if (tourStep >= 0 && !e.target.closest(".tour-card")) endTour();
+}, true);
+document.addEventListener("keydown", (e) => {
+  if (tourStep < 0) return;
+  if (e.key === "Escape") { e.stopPropagation(); endTour(); }
+  else if (e.key === "ArrowRight" && tourStep < TOUR_STEPS.length - 1) showTourStep(tourStep + 1);
+  else if (e.key === "ArrowLeft" && tourStep > 0) showTourStep(tourStep - 1);
+}, true);
+
 // ------------------------------------------------------------------ boot
 (async function boot() {
   if (!DEMO) document.title = APP_NAME;
@@ -1984,6 +2082,8 @@ document.addEventListener("input", (e) => {
   if (DEMO && $("#demo-count")) $("#demo-count").textContent = S.families.length;
   addEventListener("hashchange", render);
   render();
+  // first visit to the demo gallery: offer the welcome tour once
+  if (DEMO && !store.get("welcomed", false) && route().name === "all") setTimeout(startTour, 900);
   // While the first index is still being built, keep refreshing.
   const watch = async () => {
     if (!S.lib.scan.scanning) return;

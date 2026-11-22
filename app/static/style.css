@@ -913,3 +913,25 @@ textarea.note { width: 100%; min-height: 90px; border: 1px solid var(--line-2); 
 @media (max-width: 699.98px) and (prefers-reduced-motion: reduce) { .layout .side, .side-scrim { transition: none; } }
 .nav span:not(.count) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (hover: none) and (pointer: coarse), (max-width: 1000px) { .nav .kbd-hint { display: none; } }
+
+/* ---------------------------------------------------------------- demo welcome tour */
+.tour { position: fixed; inset: 0; z-index: 90; pointer-events: none; }
+.tour.tour-dim { background: rgba(10, 8, 5, .32); }
+.tour-ring { position: fixed; border-radius: 14px; box-shadow: 0 0 0 2px var(--accent), 0 0 0 9999px rgba(10, 8, 5, .32);
+  transition: left .2s, top .2s, width .2s, height .2s; }
+.tour-card { position: fixed; pointer-events: auto; width: min(380px, calc(100vw - 24px)); padding: 18px 18px 14px; border-radius: 16px;
+  background: var(--card); color: var(--ink); border: 1px solid var(--line-2); box-shadow: var(--shadow-lg); animation: rise .25s ease both; }
+.tour-card.tour-docked { left: 50% !important; top: auto !important; bottom: 20px; translate: -50% 0; }
+.tour-dim .tour-card.tour-docked { top: 50% !important; bottom: auto; translate: -50% -50%; }
+.tour-count { font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.tour-card h3 { margin: 8px 0 6px; font-size: 19px; }
+.tour-card p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.tour-card p svg.i { width: 15px; height: 15px; vertical-align: -3px; }
+.tour-card kbd { font: 600 11px/1 var(--mono); padding: 2px 5px; border-radius: 5px; border: 1px solid var(--line-2); background: var(--paper-2); }
+.tour-actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; justify-content: flex-end; }
+.tour-skip { margin-right: auto; border: 0; background: none; padding: 4px 0; font-size: 13px; color: var(--muted); cursor: pointer; }
+.tour-skip:hover { color: var(--ink); text-decoration: underline; }
+.tour-dots { display: flex; gap: 5px; margin-right: 4px; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line-2); }
+.tour-dots i.on { background: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .tour-ring { transition: none; } .tour-card { animation: none; } }

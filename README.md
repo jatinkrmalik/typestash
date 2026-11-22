@@ -36,6 +36,11 @@ a proper type tester, glyph maps, collections and one-click downloads.</p>
   <a href="#reverse-proxy">Reverse proxy</a>
 </p>
 
+<p align="center">
+  <a href="https://youtu.be/99gNLvk2k-0"><img src="docs/video.jpg" width="560" alt="Watch the 90-second Typestash tour on YouTube"></a><br>
+  <sub>▶ <a href="https://youtu.be/99gNLvk2k-0">Watch the 90-second tour</a></sub>
+</p>
+
 ## Why
 
 Fonts pile up: a zip from a client, a folder from an old laptop, that one typeface you
