@@ -30,7 +30,7 @@ a proper type tester, glyph maps, collections and one-click downloads.</p>
 ![Typestash gallery](docs/gallery-light.png)
 
 <p align="center">
-  <a href="https://jatinkrmalik.com/typestash/"><b>Live demo</b></a> ·
+  <a href="https://typestash.j47.in/"><b>Live demo</b></a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#configuration">Configuration</a> ·
   <a href="#reverse-proxy">Reverse proxy</a>
@@ -227,7 +227,7 @@ docker compose -f docker-compose.dev.yml up --build   # live-edits app/
 No build step: `app/server.py` (Python stdlib + [fontTools](https://github.com/fonttools/fonttools))
 and `app/static/` (plain HTML, CSS and JavaScript).
 
-The [live demo](https://jatinkrmalik.com/typestash/) is the same front end in
+The [live demo](https://typestash.j47.in/) is the same front end in
 demo mode: `demo/build_demo.py` indexes free fonts from
 [google/fonts](https://github.com/google/fonts) with the real server code and writes
 a static snapshot. Build it locally with:
