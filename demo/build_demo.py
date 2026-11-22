@@ -22,6 +22,41 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 
+SITE = os.environ.get("TYPESTASH_SITE_URL", "https://typestash.j47.in").rstrip("/")
+
+
+def seo_head(families):
+    """Title, description, canonical, Open Graph and Twitter tags for the public demo."""
+    from html import escape
+    title = "Typestash live demo · open-licensed fonts in your browser"
+    desc = (f"Try Typestash with {families} open-licensed font families: live previews, a type tester, "
+            "glyph maps and compare, right in your browser. Nothing to install.")
+    url, img = f"{SITE}/demo/", f"{SITE}/og/demo.png"
+    alt = "Typestash live demo: Try it in your browser. Next to a screenshot of the compare view."
+    tags = [
+        f"<title>{escape(title)}</title>",
+        f'<meta name="description" content="{escape(desc)}">',
+        '<meta name="robots" content="index, follow, max-image-preview:large">',
+        f'<link rel="canonical" href="{url}">',
+        '<meta property="og:type" content="website">',
+        '<meta property="og:site_name" content="Typestash">',
+        f'<meta property="og:url" content="{url}">',
+        f'<meta property="og:title" content="{escape(title)}">',
+        f'<meta property="og:description" content="{escape(desc)}">',
+        f'<meta property="og:image" content="{img}">',
+        '<meta property="og:image:type" content="image/png">',
+        '<meta property="og:image:width" content="1200">',
+        '<meta property="og:image:height" content="630">',
+        f'<meta property="og:image:alt" content="{escape(alt)}">',
+        '<meta name="twitter:card" content="summary_large_image">',
+        f'<meta name="twitter:title" content="{escape(title)}">',
+        f'<meta name="twitter:description" content="{escape(desc)}">',
+        f'<meta name="twitter:image" content="{img}">',
+        f'<meta name="twitter:image:alt" content="{escape(alt)}">',
+    ]
+    return "\n".join(tags)
+
+
 def main(fonts, out, repo):
     fonts, out = Path(fonts).resolve(), Path(out).resolve()
     data = Path(tempfile.mkdtemp(prefix="typestash-demo-"))
@@ -64,6 +99,7 @@ def main(fonts, out, repo):
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     flag = f"<script>window.TYPESTASH_DEMO = {json.dumps({'repo': repo})};</script>\n"
     html = html.replace('<script src="static/app.js">', flag + '<script src="static/app.js">')
+    html = html.replace("<title>Typestash</title>", seo_head(len(lib["families"])), 1)
     (out / "index.html").write_text(html, encoding="utf-8")
     (out / ".nojekyll").write_text("")
     shutil.copyfile(ROOT / "app" / "static" / "favicon.svg", out / "favicon.svg")

@@ -1965,7 +1965,7 @@ document.addEventListener("input", (e) => {
 
 // ------------------------------------------------------------------ boot
 (async function boot() {
-  document.title = DEMO ? `${APP_NAME} · live demo` : APP_NAME;
+  if (!DEMO) document.title = APP_NAME;
   if (DEMO) {
     document.body.insertAdjacentHTML("afterbegin", `<div class="demo-bar" role="region" aria-label="Live demo">
       <a class="demo-home" href="${HOME}"><span aria-hidden="true">←</span> Typestash</a>
