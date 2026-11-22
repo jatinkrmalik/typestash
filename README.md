@@ -19,10 +19,8 @@ a proper type tester, glyph maps, collections and one-click downloads.</p>
   <br>
   <img src="https://img.shields.io/badge/python-3.11%2B-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+">
   <a href="https://github.com/fonttools/fonttools"><img src="https://img.shields.io/badge/powered%20by-fontTools-8a4dff?style=flat-square" alt="Powered by fontTools"></a>
-  <img src="https://img.shields.io/badge/frontend-no%20build%20step-f0458f?style=flat-square&logo=javascript&logoColor=white" alt="No build step">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ffc21a?style=flat-square" alt="MIT license"></a>
   <a href="https://github.com/jatinkrmalik/typestash/stargazers"><img src="https://img.shields.io/github/stars/jatinkrmalik/typestash?style=flat-square&color=ff4a1c&logo=github" alt="GitHub stars"></a>
-  <a href="https://github.com/jatinkrmalik/typestash/commits/main"><img src="https://img.shields.io/github/last-commit/jatinkrmalik/typestash?style=flat-square&color=17140f" alt="Last commit"></a>
   <a href="https://github.com/sponsors/jatinkrmalik"><img src="https://img.shields.io/badge/sponsor-%E2%99%A5-f0458f?style=flat-square&logo=githubsponsors&logoColor=white" alt="Sponsor"></a>
   <a href="https://buymeacoffee.com/jk"><img src="https://img.shields.io/badge/buy%20me%20a-coffee-ffc21a?style=flat-square&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
 </p>
@@ -30,7 +28,8 @@ a proper type tester, glyph maps, collections and one-click downloads.</p>
 ![Typestash gallery](docs/gallery-light.png)
 
 <p align="center">
-  <a href="https://typestash.j47.in/"><b>Live demo</b></a> ·
+  <a href="https://typestash.j47.in/demo/"><b>Live demo</b></a> ·
+  <a href="https://typestash.j47.in/">Website</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#configuration">Configuration</a> ·
   <a href="#reverse-proxy">Reverse proxy</a>
@@ -227,16 +226,20 @@ docker compose -f docker-compose.dev.yml up --build   # live-edits app/
 No build step: `app/server.py` (Python stdlib + [fontTools](https://github.com/fonttools/fonttools))
 and `app/static/` (plain HTML, CSS and JavaScript).
 
-The [live demo](https://typestash.j47.in/) is the same front end in
-demo mode: `demo/build_demo.py` indexes free fonts from
-[google/fonts](https://github.com/google/fonts) with the real server code and writes
-a static snapshot. Build it locally with:
+The [website](https://typestash.j47.in/) is `site/` (one static page), and the
+[live demo](https://typestash.j47.in/demo/) is the same front end in demo mode:
+`demo/build_demo.py` indexes about 450 of the most popular open-licensed families from
+[google/fonts](https://github.com/google/fonts) (OFL, Apache 2.0 and UFL, listed in
+`demo/fonts.txt`) with the real server code and writes a static snapshot. Build both
+locally with:
 
 ```sh
 python demo/fetch_fonts.py demo/fonts.txt _fonts
-python demo/build_demo.py _fonts _site
+bash demo/build_site.sh _fonts _site
 python -m http.server -d _site 8000
 ```
+
+`python demo/pick_fonts.py` regenerates the font list from Google Fonts popularity.
 
 ## Support
 

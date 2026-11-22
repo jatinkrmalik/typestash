@@ -3,7 +3,7 @@ name: Demo site
 on:
   push:
     branches: [main]
-    paths: ["app/**", "demo/**", "requirements.txt", ".github/workflows/pages.yml"]
+    paths: ["app/**", "demo/**", "site/**", "docs/**", "requirements.txt", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -28,12 +28,12 @@ jobs:
           cache: pip
           cache-dependency-path: requirements.txt
       - run: pip install -r requirements.txt
-      - name: Download demo fonts (SIL OFL, from google/fonts)
+      - name: Download demo fonts (open-licensed, from google/fonts)
         run: python demo/fetch_fonts.py demo/fonts.txt _fonts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build static demo
-        run: python demo/build_demo.py _fonts _site "${{ github.server_url }}/${{ github.repository }}"
+      - name: Build landing page and demo
+        run: bash demo/build_site.sh _fonts _site "${{ github.server_url }}/${{ github.repository }}"
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

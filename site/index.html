@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Typestash · a self-hosted home for every font you own</title>
+<meta name="description" content="Typestash turns a folder of fonts on your NAS or server into a searchable gallery with live previews, a type tester, glyph maps, compare and one-click downloads. Free, open source, one Docker command.">
+<meta property="og:title" content="Typestash">
+<meta property="og:description" content="A self-hosted home for every font you own. Live previews, type tester, compare, 12 themes. One Docker command.">
+<meta property="og:image" content="https://typestash.j47.in/img/gallery-light.png">
+<meta property="og:url" content="https://typestash.j47.in/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3eee4">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<script>
+  // Old links pointed at the app itself (typestash.j47.in/#/f/inter): send them to the demo.
+  if (location.hash.startsWith("#/")) location.replace("demo/" + location.hash);
+</script>
+<style>
+@font-face { font-family: "Fraunces"; src: url("fonts/fraunces.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+:root {
+  --paper: #f3eee4; --paper-2: #e9e2d4; --card: #fffdf8; --ink: #17140f; --ink-2: #3a342b; --muted: #6b6257;
+  --line: rgba(23, 20, 15, .12); --accent: #ff4a1c; --accent-ink: #fff; --ok: #12a36b;
+  --serif: "Fraunces", Georgia, serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  --wrap: 1180px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(rgba(23, 20, 15, .07) 1.2px, transparent 1.3px); background-size: 28px 28px; }
+a { color: inherit; }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { width: min(var(--wrap), 100% - 32px); margin: 0 auto; }
+.serif { font-family: var(--serif); font-variation-settings: "opsz" 144, "SOFT" 50; }
+h1, h2, h3 { font-family: var(--serif); font-variation-settings: "opsz" 144, "SOFT" 50; font-weight: 650; letter-spacing: -.02em; line-height: 1.04; margin: 0; }
+em.acc { color: var(--accent); font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1; }
+.kicker { font: 700 13px/1.5 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1, h2, h3, .kicker { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
+
+/* nav */
+.nav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; align-items: center; gap: 22px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 650 23px/1 var(--serif); font-variation-settings: "opsz" 144, "SOFT" 50; letter-spacing: -.02em; }
+.brand img { width: 34px; height: 34px; border-radius: 9px; }
+.nav-links { display: flex; gap: 22px; margin-left: auto; font-size: 15px; }
+.nav-links a { text-decoration: none; color: var(--ink-2); }
+.nav-links a:hover { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 20px; border-radius: 12px; border: 2px solid var(--ink);
+  font: 650 15.5px/1 var(--sans); text-decoration: none; white-space: nowrap; cursor: pointer; transition: transform .12s, box-shadow .12s, background .15s; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); box-shadow: 4px 4px 0 var(--ink); }
+.btn.primary:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.btn.ghost { background: var(--card); color: var(--ink); }
+.btn.ghost:hover { background: var(--paper-2); }
+.btn.small { height: 38px; padding: 0 14px; font-size: 14px; box-shadow: 3px 3px 0 var(--ink); }
+.btn svg { width: 18px; height: 18px; flex: none; }
+
+/* hero */
+.hero { padding: 72px 0 40px; text-align: center; }
+.hero h1 { font-size: clamp(46px, 8.2vw, 104px); margin: 18px auto 0; max-width: 13ch; }
+.hero .lede { max-width: 640px; margin: 26px auto 0; font-size: clamp(17px, 2.1vw, 20px); color: var(--ink-2); }
+.ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 34px; }
+.facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; margin-top: 22px; font: 13.5px var(--mono); color: var(--muted); }
+.facts span::before { content: "✓ "; color: var(--ok); font-weight: 700; }
+.shot { position: relative; margin: 64px auto 0; max-width: 1080px; }
+.frame { border: 2px solid var(--ink); border-radius: 18px; overflow: hidden; background: var(--card); box-shadow: 12px 12px 0 var(--ink), 0 40px 80px rgba(23, 20, 15, .15); }
+.frame .bar { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; background: var(--paper-2); border-bottom: 2px solid var(--ink); }
+.frame .bar i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; border: 1px solid rgba(0,0,0,.15); }
+.frame .bar i:nth-child(2) { background: #febc2e; } .frame .bar i:nth-child(3) { background: #28c840; }
+.frame .bar span { margin-left: 14px; flex: 0 1 380px; height: 24px; border-radius: 7px; background: var(--card); border: 1px solid var(--line);
+  font: 12.5px/22px var(--mono); color: var(--muted); padding: 0 10px; text-align: left; overflow: hidden; white-space: nowrap; }
+.sticker { position: absolute; font: 700 clamp(13px, 1.6vw, 18px)/1 var(--mono); padding: 12px 18px; border-radius: 999px; border: 2px solid var(--ink);
+  background: var(--card); box-shadow: 4px 4px 0 var(--ink); white-space: nowrap; animation: bob 5s ease-in-out infinite; }
+.sticker.s1 { left: -34px; top: 34%; rotate: -6deg; }
+.sticker.s2 { right: -30px; top: 12%; rotate: 5deg; background: var(--accent); color: #fff; animation-delay: -2.5s; }
+.sticker.s3 { right: 6%; bottom: -22px; rotate: -3deg; animation-delay: -1.2s; }
+@keyframes bob { 50% { translate: 0 -8px; } }
+
+/* problem strip */
+.problem { padding: 110px 0 30px; text-align: center; overflow: hidden; }
+.problem h2 { font-size: clamp(40px, 6.4vw, 80px); }
+.problem p { max-width: 620px; margin: 20px auto 0; color: var(--ink-2); font-size: 18px; }
+.marquee { margin-top: 44px; display: grid; gap: 14px; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.row { display: flex; gap: 14px; width: max-content; animation: slide 60s linear infinite; }
+.row.r2 { animation-direction: reverse; animation-duration: 70s; }
+.row span { font: 500 15px/1 var(--mono); padding: 11px 15px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 4px 14px rgba(23, 20, 15, .06); white-space: nowrap; }
+.row span b { color: var(--muted); font-weight: 400; margin-right: 6px; }
+.row span.d b { color: var(--accent); }
+@keyframes slide { to { transform: translateX(-50%); } }
+
+/* features */
+.features { padding: 100px 0 40px; }
+.section-head { text-align: center; max-width: 760px; margin: 0 auto 70px; }
+.section-head h2 { font-size: clamp(38px, 5.4vw, 66px); margin-top: 14px; }
+.section-head p { color: var(--ink-2); font-size: 18px; margin: 18px 0 0; }
+.feature { display: grid; grid-template-columns: 1fr 1.35fr; gap: 64px; align-items: center; margin-bottom: 110px; }
+.feature.flip { grid-template-columns: 1.35fr 1fr; }
+.feature.flip .copy { order: 2; }
+.feature .num { font: 700 13px/1 var(--mono); color: var(--accent); letter-spacing: .14em; }
+.feature h3 { font-size: clamp(32px, 4vw, 48px); margin: 12px 0 16px; }
+.feature p { color: var(--ink-2); margin: 0 0 16px; }
+.feature ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.feature li { padding-left: 26px; position: relative; color: var(--ink-2); font-size: 16px; }
+.feature li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 9px; height: 9px; border-radius: 3px; background: var(--accent); rotate: 45deg; }
+.feature .frame { box-shadow: 10px 10px 0 var(--ink); }
+kbd { font: 600 12.5px/1 var(--mono); padding: 3px 7px; border-radius: 6px; border: 1px solid var(--line); border-bottom-width: 2px; background: var(--card); }
+
+.grid6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card { background: var(--card); border: 2px solid var(--ink); border-radius: 18px; padding: 26px 26px 24px; box-shadow: 5px 5px 0 var(--ink); transition: transform .15s, box-shadow .15s; }
+.card:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+.card .ic { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: var(--paper-2); font-size: 22px; margin-bottom: 16px; }
+.card h4 { margin: 0 0 8px; font: 650 22px/1.15 var(--serif); font-variation-settings: "opsz" 144, "SOFT" 50; letter-spacing: -.01em; }
+.card p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
+
+/* self-host */
+.host { margin-top: 110px; background: var(--ink); color: var(--paper); padding: 110px 0; position: relative; overflow: hidden; }
+.host::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(243, 238, 228, .07) 1.2px, transparent 1.3px); background-size: 28px 28px; }
+.host .wrap { position: relative; }
+.host .section-head p { color: rgba(243, 238, 228, .72); }
+.term { max-width: 900px; margin: 0 auto; border-radius: 18px; background: #0d0b08; border: 2px solid rgba(243, 238, 228, .2); box-shadow: 12px 12px 0 var(--accent); overflow: hidden; }
+.term .bar { display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border-bottom: 1px solid rgba(243, 238, 228, .12); }
+.term .bar i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; } .term .bar i:nth-child(2) { background: #febc2e; } .term .bar i:nth-child(3) { background: #28c840; }
+.term .bar span { margin-left: 12px; font: 13px var(--mono); color: rgba(243, 238, 228, .5); }
+.term .bar button { margin-left: auto; font: 600 13px var(--mono); color: var(--paper); background: rgba(243, 238, 228, .1); border: 1px solid rgba(243, 238, 228, .2); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.term .bar button:hover { background: var(--accent); border-color: var(--accent); }
+.term pre { margin: 0; padding: 26px 28px 28px; overflow-x: auto; font: 16px/1.7 var(--mono); color: var(--paper); }
+.term pre .p { color: var(--accent); user-select: none; }
+.term pre .c { color: rgba(243, 238, 228, .45); }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 44px; }
+.chips a, .chips span { font: 600 15px/1 var(--mono); padding: 12px 18px; border-radius: 999px; border: 1.5px solid rgba(243, 238, 228, .22); background: rgba(243, 238, 228, .06); color: var(--paper); text-decoration: none; }
+.chips a:hover { border-color: var(--accent); color: var(--accent); }
+.host .ctas { margin-top: 44px; }
+.host .btn.ghost { background: transparent; color: var(--paper); border-color: rgba(243, 238, 228, .5); }
+.host .btn.ghost:hover { border-color: var(--paper); }
+.host .btn.primary { box-shadow: 4px 4px 0 var(--paper); border-color: var(--paper); }
+
+/* footer */
+footer { padding: 54px 0 60px; font-size: 15px; color: var(--muted); }
+footer .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; }
+footer .brand { color: var(--ink); font-size: 20px; }
+footer .brand img { width: 28px; height: 28px; }
+footer nav { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-left: auto; }
+footer nav a { text-decoration: none; color: var(--ink-2); }
+footer nav a:hover { color: var(--accent); }
+footer .fine { width: 100%; font-size: 13px; }
+
+@media (max-width: 900px) {
+  .feature, .feature.flip { grid-template-columns: 1fr; gap: 30px; margin-bottom: 80px; }
+  .feature.flip .copy { order: 0; }
+  .grid6 { grid-template-columns: 1fr 1fr; }
+  .sticker.s1 { left: -8px; } .sticker.s2 { right: -8px; }
+}
+@media (max-width: 640px) {
+  .nav-links a:not(.btn) { display: none; }
+  .hero { padding-top: 48px; }
+  .grid6 { grid-template-columns: 1fr; }
+  .frame { box-shadow: 6px 6px 0 var(--ink); border-radius: 12px; }
+  .frame .bar { height: 30px; } .frame .bar span { display: none; }
+  .sticker { padding: 8px 12px; box-shadow: 3px 3px 0 var(--ink); }
+  .sticker.s1 { top: auto; bottom: -18px; left: 4px; } .sticker.s2 { top: -18px; right: 4px; } .sticker.s3 { display: none; }
+  .term pre { font-size: 13.5px; padding: 20px; }
+  .problem { padding-top: 80px; } .features { padding-top: 70px; } .host { padding: 80px 0; }
+  footer nav { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="img/icon-512.png" alt="">Typestash</a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#self-host">Self-host</a>
+      <a href="https://github.com/jatinkrmalik/typestash">GitHub</a>
+      <a class="btn primary small" href="demo/">Live demo</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="kicker">Self-hosted font library · Open source</div>
+    <h1>Every font you own. <em class="acc">One home.</em></h1>
+    <p class="lede">Point Typestash at a folder of fonts and get a searchable gallery with live previews,
+      a real type tester, glyph maps, side-by-side compare and one-click downloads.
+      On your NAS or server, in any browser.</p>
+    <div class="ctas">
+      <a class="btn primary" href="demo/">Try the live demo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn ghost" href="https://github.com/jatinkrmalik/typestash">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Star on GitHub</a>
+    </div>
+    <div class="facts"><span>Free &amp; MIT licensed</span><span>One Docker command</span><span>amd64 · arm64</span><span>No account, no tracking</span></div>
+
+    <div class="shot">
+      <div class="frame">
+        <div class="bar"><i></i><i></i><i></i><span>fonts.home.lan</span></div>
+        <img src="img/gallery-light.png" width="2160" height="1440" alt="The Typestash gallery: a grid of font cards, each set in its own font">
+      </div>
+      <div class="sticker s1">every card in its own font</div>
+      <div class="sticker s2">⌘K for everything</div>
+      <div class="sticker s3">12 themes</div>
+    </div>
+  </div>
+</section>
+
+<section class="problem">
+  <div class="wrap">
+    <h2>Fonts everywhere.<br><em class="acc">Found nowhere.</em></h2>
+    <p>A zip from a client, a folder from an old laptop, that typeface you bought for one invite.
+      Desktop font managers only see one machine. Typestash turns a folder on your server into a
+      font library you can open from anywhere.</p>
+  </div>
+  <div class="marquee" aria-hidden="true">
+    <div class="row" id="r1"></div>
+    <div class="row r2" id="r2"></div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">What you get</div>
+      <h2>Built for people who <em class="acc">collect</em> type.</h2>
+      <p>Everything is read from inside the font files: names, weights, axes, features, scripts and licences.
+        Not guessed from file names.</p>
+    </div>
+
+    <div class="feature">
+      <div class="copy">
+        <div class="num">01 · GALLERY</div>
+        <h3>Every font, at a glance</h3>
+        <p>Each card is set in its own font. Type your own sample, resize, and switch between grid and list.</p>
+        <ul>
+          <li>Filter by sans, serif, mono, display or script, variable fonts and italics</li>
+          <li>A Scripts menu built from your library: Cyrillic, Greek, Arabic, Devanagari and more</li>
+          <li>Saved preview presets, favourites and collections</li>
+        </ul>
+      </div>
+      <div class="frame"><div class="bar"><i></i><i></i><i></i></div><img loading="lazy" src="img/gallery.png" width="2160" height="1440" alt="Gallery in the Ink dark theme"></div>
+    </div>
+
+    <div class="feature flip">
+      <div class="copy">
+        <div class="num">02 · FAMILY</div>
+        <h3>Dig into every family</h3>
+        <p>A proper type tester for every family, with the details you normally need three apps for.</p>
+        <ul>
+          <li>Variable-axis sliders with an animate button, plus named instances</li>
+          <li>OpenType feature toggles: ligatures, small caps, figures, stylistic sets</li>
+          <li>Waterfall, pairing suggestions and a full glyph map (click to inspect, double-click to copy)</li>
+        </ul>
+      </div>
+      <div class="frame"><div class="bar"><i></i><i></i><i></i></div><img loading="lazy" src="img/family.png" width="2160" height="1440" alt="Family page with type tester and variable axes"></div>
+    </div>
+
+    <div class="feature">
+      <div class="copy">
+        <div class="num">03 · COMPARE</div>
+        <h3>Compare side by side</h3>
+        <p>Put up to eight fonts head to head and actually choose.</p>
+        <ul>
+          <li>Columns, rows, or an overlay on one shared baseline</li>
+          <li>Metric bars for x-height, cap height, width and more, lined up across fonts</li>
+          <li>One weight slider drives every font, variable or static</li>
+        </ul>
+      </div>
+      <div class="frame"><div class="bar"><i></i><i></i><i></i></div><img loading="lazy" src="img/compare.png" width="2160" height="1440" alt="Compare view with four fonts in columns"></div>
+    </div>
+
+    <div class="feature flip">
+      <div class="copy">
+        <div class="num">04 · THEMES &amp; KEYBOARD</div>
+        <h3>Twelve themes, keyboard first</h3>
+        <p>Paper, Ink, Dracula, Nord, Tokyo Night, Catppuccin, Gruvbox and more. Every theme passes WCAG AA for text.</p>
+        <ul>
+          <li>A command bar for everything: <kbd>⌘K</kbd> on macOS, <kbd>Super+K</kbd> on Linux, <kbd>Ctrl+K</kbd> on Windows</li>
+          <li><kbd>/</kbd> search, <kbd>[</kbd> sidebar, <kbd>d</kbd> light or dark, <kbd>,</kbd> settings</li>
+          <li>Works on phones and tablets too</li>
+        </ul>
+      </div>
+      <div class="frame"><div class="bar"><i></i><i></i><i></i></div><img loading="lazy" src="img/themes.png" width="2160" height="1440" alt="Theme panel with twelve light and dark themes"></div>
+    </div>
+
+    <div class="grid6">
+      <div class="card"><div class="ic">⤓</div><h4>Drag, drop, done</h4><p>Drop fonts or .zip archives anywhere on the page. They're validated, de-duplicated and filed as Uploads/&lt;Family&gt;/.</p></div>
+      <div class="card"><div class="ic">◫</div><h4>Download anything</h4><p>One style, a whole family as a zip, a collection, or a PNG specimen sheet.</p></div>
+      <div class="card"><div class="ic">⌗</div><h4>Real metadata</h4><p>Designer, foundry, version, licence and language support, read from inside each font.</p></div>
+      <div class="card"><div class="ic">♲</div><h4>Housekeeping</h4><p>A duplicates &amp; issues page lists identical files and fonts that can't be read. Nothing is ever deleted.</p></div>
+      <div class="card"><div class="ic">Aa</div><h4>Every format</h4><p>TTF, OTF, WOFF, WOFF2 and TTC/OTC collections, including every face inside a collection.</p></div>
+      <div class="card"><div class="ic">⚿</div><h4>Yours, privately</h4><p>Runs on your hardware. No accounts, no telemetry, optional password for the whole app.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="host" id="self-host">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Self-host it</div>
+      <h2>Your server. Your fonts. <em class="acc">One command.</em></h2>
+      <p>A small multi-arch image for x86 and ARM: NAS boxes, Raspberry Pi, Apple Silicon. Your fonts folder stays as it is.</p>
+    </div>
+    <div class="term">
+      <div class="bar"><i></i><i></i><i></i><span>~/typestash</span><button type="button" id="copy">Copy</button></div>
+<pre id="cmd"><span class="p">$ </span>docker run -d --name typestash -p 8080:8080 \
+    -v "$PWD/fonts:/fonts" -v "$PWD/data:/data" \
+    -e PUID=$(id -u) -e PGID=$(id -g) \
+    --restart unless-stopped \
+    ghcr.io/jatinkrmalik/typestash:latest
+<span class="c"># then open http://localhost:8080 and drop some fonts on the page</span></pre>
+    </div>
+    <div class="chips">
+      <a href="https://github.com/jatinkrmalik/typestash#docker-compose">Docker Compose</a>
+      <a href="https://github.com/jatinkrmalik/typestash#unraid">Unraid template</a>
+      <a href="https://github.com/jatinkrmalik/typestash/pkgs/container/typestash">ghcr.io image</a>
+      <span>linux/amd64 · linux/arm64</span>
+      <a href="https://github.com/jatinkrmalik/typestash#without-docker">Without Docker</a>
+    </div>
+    <div class="ctas">
+      <a class="btn primary" href="demo/">Try the live demo first</a>
+      <a class="btn ghost" href="https://github.com/jatinkrmalik/typestash#quick-start">Read the docs</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="./"><img src="img/icon-512.png" alt="">Typestash</a>
+    <nav>
+      <a href="demo/">Live demo</a>
+      <a href="https://github.com/jatinkrmalik/typestash">GitHub</a>
+      <a href="https://github.com/jatinkrmalik/typestash/releases">Releases</a>
+      <a href="https://github.com/sponsors/jatinkrmalik">Sponsor</a>
+      <a href="https://buymeacoffee.com/jk">Buy me a coffee</a>
+    </nav>
+    <div class="fine">Made by <a href="https://jatinkrmalik.com">Jatin K Malik</a>. MIT licensed.
+      The demo uses open-licensed fonts from <a href="https://github.com/google/fonts">Google Fonts</a>;
+      headings are set in Fraunces (SIL Open Font License).</div>
+  </div>
+</footer>
+
+<script>
+  const files = [
+    ["d", "~/Downloads/fonts.zip"], ["f", "Montserrat-Bold (1).ttf"], ["f", "FINAL_brand_font_v3.otf"], ["d", "fonts-backup-2019/"],
+    ["f", "Inter-VariableFont_opsz,wght.ttf"], ["d", "New folder (7)/"], ["f", "Futura-Book-copy.ttf"], ["d", "client-x/assets/fonts/"],
+    ["f", "Lobster-Regular (2).ttf"], ["f", "DIN-Condensed.ttc"], ["f", "Untitled-font.woff2"], ["d", "do-not-delete/fonts/"],
+    ["f", "Caveat[wght].ttf"], ["f", "logo-font-maybe.otf"], ["d", "old-mac/Fonts/"], ["f", "JetBrainsMono-2.304.zip"],
+    ["f", "SpaceMono-Bold.ttf"], ["d", "handwriting-pack/"], ["f", "Abril_Fatface.zip"], ["d", "Desktop/stuff/"],
+  ];
+  const chip = ([k, n]) => `<span class="${k}"><b>${k === "d" ? "▸" : "◆"}</b>${n}</span>`;
+  const half = (a) => a.map(chip).join("");
+  const a = files.slice(0, 10), b = files.slice(10);
+  document.getElementById("r1").innerHTML = half(a) + half(a);
+  document.getElementById("r2").innerHTML = half(b) + half(b);
+
+  document.getElementById("copy").addEventListener("click", async (e) => {
+    const text = document.getElementById("cmd").innerText.replace(/^\$ /, "").split("\n# ")[0].trim();
+    try { await navigator.clipboard.writeText(text); e.target.textContent = "Copied ✓"; }
+    catch { e.target.textContent = "Select & copy"; }
+    setTimeout(() => (e.target.textContent = "Copy"), 1800);
+  });
+</script>
+</body>
+</html>
