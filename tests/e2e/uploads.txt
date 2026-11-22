@@ -1,0 +1,4 @@
+# Fonts the upload tests add. Keep them out of fonts.txt.
+ofl/youngserif
+ofl/zeyada
+apache/yellowtail

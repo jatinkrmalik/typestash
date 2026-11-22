@@ -1,0 +1,12 @@
+{
+  "name": "typestash-e2e",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end browser tests for Typestash",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.65.1"
+  }
+}

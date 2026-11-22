@@ -9,6 +9,7 @@ a proper type tester, glyph maps, collections and one-click downloads.</p>
 <p align="center">
   <a href="https://github.com/jatinkrmalik/typestash/actions/workflows/docker.yml"><img src="https://github.com/jatinkrmalik/typestash/actions/workflows/docker.yml/badge.svg" alt="Docker image"></a>
   <a href="https://github.com/jatinkrmalik/typestash/actions/workflows/check.yml"><img src="https://github.com/jatinkrmalik/typestash/actions/workflows/check.yml/badge.svg" alt="Check"></a>
+  <a href="https://github.com/jatinkrmalik/typestash/actions/workflows/e2e.yml"><img src="https://github.com/jatinkrmalik/typestash/actions/workflows/e2e.yml/badge.svg" alt="End-to-end tests"></a>
   <a href="https://github.com/jatinkrmalik/typestash/actions/workflows/pages.yml"><img src="https://github.com/jatinkrmalik/typestash/actions/workflows/pages.yml/badge.svg" alt="Demo site"></a>
   <br>
   <a href="https://github.com/jatinkrmalik/typestash/releases"><img src="https://img.shields.io/github/v/release/jatinkrmalik/typestash?style=flat-square&color=ff4a1c&label=release" alt="Latest release"></a>
@@ -240,6 +241,25 @@ python -m http.server -d _site 8000
 ```
 
 `python demo/pick_fonts.py` regenerates the font list from Google Fonts popularity.
+
+### End-to-end tests
+
+`tests/e2e` drives every feature in a real browser (Playwright): the gallery and its
+filters, family pages, compare, collections, the command bar and shortcuts, all
+themes, settings, uploads, and the phone and foldable layouts. `run.mjs` downloads a
+small set of open-licensed fonts, starts a throwaway server with an empty data
+folder, runs the suite and stops the server, so your own library is never touched.
+
+```sh
+pip install -r requirements.txt
+cd tests/e2e
+npm install && npx playwright install chromium
+node run.mjs
+```
+
+The same suite runs on every push and pull request ([E2E workflow](.github/workflows/e2e.yml)).
+To test a container instead, start it with a fonts folder that holds `fonts.txt` and
+run `node e2e.mjs http://localhost:8080 <uploads-dir>`.
 
 ## Support
 

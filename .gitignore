@@ -5,3 +5,6 @@ _fonts/
 .env
 __pycache__/
 *.pyc
+tests/e2e/node_modules/
+tests/e2e/.work/
+tests/e2e/results.json

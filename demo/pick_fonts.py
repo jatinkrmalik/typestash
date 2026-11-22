@@ -14,6 +14,12 @@ import os
 import re
 import sys
 import urllib.request
+
+try:  # use the OS certificate store when available (helps behind HTTPS-inspecting proxies)
+    import truststore
+    truststore.inject_into_ssl()
+except ImportError:
+    pass
 from collections import Counter
 from pathlib import Path
 
