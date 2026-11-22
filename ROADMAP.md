@@ -72,8 +72,10 @@ from your own server, the way Google Fonts works, but for fonts you own.
 
 ## Done
 
-- **0.3:** website and a 445-family live demo, phone and foldable layouts, a welcome tour,
-  pinned card footers, an end-to-end test suite in CI.
+- **On main, next release:** a welcome tour on first visit (replay it from Settings), a demo
+  tour button, the tour video on the website.
+- **0.3:** website and a 445-family live demo, phone and foldable layouts, pinned card
+  footers, an end-to-end test suite in CI.
 - **0.2:** twelve themes, side-by-side compare with metrics, a command bar, preview presets
   and a Scripts menu, a brand row on specimen PNGs.
 - **0.1:** the library itself: gallery, family pages, glyph maps, collections, uploads,
