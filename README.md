@@ -33,7 +33,8 @@ a proper type tester, glyph maps, collections and one-click downloads.</p>
   <a href="https://typestash.j47.in/">Website</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#configuration">Configuration</a> ·
-  <a href="#reverse-proxy">Reverse proxy</a>
+  <a href="#reverse-proxy">Reverse proxy</a> ·
+  <a href="ROADMAP.md">Roadmap</a>
 </p>
 
 <p align="center">
@@ -265,6 +266,14 @@ node run.mjs
 The same suite runs on every push and pull request ([E2E workflow](.github/workflows/e2e.yml)).
 To test a container instead, start it with a fonts folder that holds `fonts.txt` and
 run `node e2e.mjs http://localhost:8080 <uploads-dir>`.
+
+## Roadmap
+
+Next up is turning Typestash into **your own font registry**: publish a family and use it as
+a web font on your own sites, served from your own server, Google Fonts style. After that:
+tags and smart collections, licence tracking, "fonts that have ₹" search, desktop sync,
+share links and more. See [ROADMAP.md](ROADMAP.md), and tell me what you'd use in
+[issues](https://github.com/jatinkrmalik/typestash/issues).
 
 ## Support
 
