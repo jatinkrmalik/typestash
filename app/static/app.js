@@ -1513,7 +1513,7 @@ function paletteCommands() {
   );
   // project
   cmds.push(
-    ...(DEMO ? [{ g: "Typestash", icon: ICON.open, label: "Show the welcome tour", k: "help guide intro walkthrough onboarding", run: () => setTimeout(startTour) }] : []),
+    { g: "Typestash", icon: ICON.open, label: "Show the welcome tour", k: "help guide intro walkthrough onboarding", run: () => setTimeout(startTour) },
     { g: "Typestash", icon: ICON.github, label: "Source code on GitHub", k: "repo open source", run: () => openUrl(LINKS.source) },
     { g: "Typestash", icon: ICON.alert, label: "Report a bug", k: "issue problem", run: () => openUrl(LINKS.bug) },
     { g: "Typestash", icon: ICON.tag, label: "Releases & changelog", k: "version update", hint: S.lib.version ? `v${S.lib.version}` : "", run: () => openUrl(LINKS.releases) },
@@ -1651,6 +1651,7 @@ document.addEventListener("click", (e) => {
     else if (a === "surprise") surprise();
     else if (a === "newcoll") newCollection();
     else if (a === "rescan") rescan();
+    else if (a === "tour") setTimeout(startTour);
     else if (a === "upload") $("#file-input").click();
     else if (a === "clear") { S.q = ""; S.cat = "all"; S.vf = S.ital = false; S.script = ""; gallery(S.scope); }
     else if (a === "clearpicks") { S.picks = []; store.set("picks", []); renderTray(); renderSide(); if (route().name === "compare") comparePage(); else $$(".card.picked").forEach((c) => { c.classList.remove("picked"); $("[data-act=pick]", c).classList.remove("on"); }); }
@@ -1824,6 +1825,11 @@ function settingsPage() {
       <button class="btn small" data-act="addpreset" style="margin-top:10px">${ICON.plus} Add preset</button>
     </section>
 
+    <section class="set-sec"><h2>// welcome tour</h2>
+      <div class="set-rows"><div class="set-row"><span>Welcome tour<small>A 30-second walk through search, previews, cards and the command bar</small></span>
+        <button type="button" class="btn small" data-act="tour">${ICON.open} Show the tour</button></div></div>
+    </section>
+
     <section class="set-sec"><h2>// keyboard</h2>
       <dl class="set-keys">${keys.map(([ks, what]) => `<div><dt>${ks.map((k) => `<kbd>${esc(k)}</kbd>`).join("")}</dt><dd>${esc(what)}</dd></div>`).join("")}</dl>
     </section>
@@ -1965,25 +1971,42 @@ document.addEventListener("input", (e) => {
 });
 
 
-// ------------------------------------------------------------------ demo welcome tour
-// Shown once, on a visitor's first visit to the demo gallery. Skippable at any step
+// ------------------------------------------------------------------ welcome tour
+// Shown once, on a visitor's first visit to the gallery (demo or self-hosted). Skippable at any step
 // (Skip, Esc, or clicking outside), never shown again after, and replayable from
 // the command bar.
-const TOUR_STEPS = [
-  { title: "Welcome to the live demo", hero: true,
-    body: () => `This is a real Typestash with ${S.families.length} open-licensed font families. Nothing to install, nothing to sign up for. Want a 30-second tour of where things are?` },
-  { sel: ".field.search", title: "Search and filter",
-    body: () => "Filter by name, designer or folder. The chips below narrow it to sans, serif, mono, script, variable fonts, italics or a writing system." },
-  { sel: ".field.sample", title: "Preview your own words",
-    body: () => "Type anything to see it in every font. Use the presets and the Scripts menu to try Cyrillic, Greek, Devanagari and more, and the slider to resize." },
-  { sel: ".card", title: "Every card is a font",
-    body: () => `Click a card for its type tester, variable axes, glyph map and pairings. ${ICON.compare} adds it to Compare, ${ICON.download} downloads the family.` },
-  { sel: ".cmd-chip", title: "One shortcut for everything",
-    body: () => `Press <kbd>${MOD_LABEL}</kbd> <kbd>K</kbd> to jump to any font, switch between 12 themes, change views and filters. <kbd>/</kbd> searches, <kbd>[</kbd> hides the sidebar.` },
-  { title: "Make it yours",
-    body: () => "Favourites and collections here stay in your browser. To keep your own fonts, run Typestash on your server or NAS with one Docker command.",
-    cta: true },
-];
+const TOUR_REOPEN = () => DEMO ? `<b>Tour</b> in the bar above, or ${MOD_LABEL}+K → “tour”` : `<b>Settings</b>, or ${MOD_LABEL}+K → “tour”`;
+function tourSteps() {
+  const n = S.families.length;
+  const steps = [{ hero: true,
+    title: DEMO ? "Welcome to the live demo" : n ? "Welcome to your font library" : "Welcome to Typestash",
+    body: () => DEMO ? `This is a real Typestash with ${n} open-licensed font families. Nothing to install, nothing to sign up for. Want a 30-second tour of where things are?`
+      : n ? `Typestash has indexed ${n} font ${n === 1 ? "family" : "families"} from your fonts folder. Want a 30-second tour of where things are?`
+      : "Your library is empty for now. Here's a 30-second tour: how to add fonts, and where everything lives once you have." }];
+  if (!n) {
+    steps.push({ sel: "#upload-btn", title: "Add your fonts",
+      body: () => "Drop font files or .zip archives anywhere on the page, or click here to choose them. Or copy fonts into your fonts folder and press <b>Rescan</b> in the sidebar. TTF, OTF, WOFF, WOFF2 and TTC all work." });
+  } else {
+    steps.push(
+      { sel: ".field.search", title: "Search and filter",
+        body: () => "Filter by name, designer or folder. The chips below narrow it to sans, serif, mono, script, variable fonts, italics or a writing system." },
+      { sel: ".field.sample", title: "Preview your own words",
+        body: () => "Type anything to see it in every font. Use the presets and the Scripts menu to try Cyrillic, Greek, Devanagari and more, and the slider to resize." },
+      { sel: ".card", title: "Every card is a font",
+        body: () => `Click a card for its type tester, variable axes, glyph map and pairings. ${ICON.compare} adds it to Compare, ${ICON.download} downloads the family.` });
+    if (!DEMO) steps.push({ sel: "#upload-btn", title: "Add more fonts",
+      body: () => "Drop font files or zips anywhere on the page. They're checked, de-duplicated and filed under Uploads/&lt;Family&gt; in your fonts folder." });
+  }
+  steps.push({ sel: ".cmd-chip", title: "One shortcut for everything",
+    body: () => `Press <kbd>${MOD_LABEL}</kbd> <kbd>K</kbd> to jump to any font, switch between 12 themes, change views and filters. <kbd>/</kbd> searches, <kbd>[</kbd> hides the sidebar.` });
+  steps.push(DEMO
+    ? { title: "Make it yours", cta: true,
+        body: () => "Favourites and collections here stay in your browser. To keep your own fonts, run Typestash on your server or NAS with one Docker command." }
+    : { title: "You're all set",
+        body: () => `Favourites, collections and notes are saved on this server, so they follow you to any browser. Pick a theme and preview defaults in <b>Settings</b>, and replay this tour from there anytime.` });
+  return steps;
+}
+let TOUR_STEPS = [];
 let tourStep = -1;
 function tourEl() { return $("#tour"); }
 function endTour(quiet = false) {
@@ -1991,7 +2014,7 @@ function endTour(quiet = false) {
   tourStep = -1;
   clearInterval(markTimer);
   tourEl()?.remove();
-  if (!quiet) toast(`Reopen the tour anytime from <b>Tour</b> in the bar above, or <kbd>${MOD_LABEL}</kbd> <kbd>K</kbd> → “tour”.`, { raw: true });
+  if (!quiet) toast(`Reopen the tour anytime from ${TOUR_REOPEN()}.`, { raw: true });
   removeEventListener("resize", placeTour);
   removeEventListener("scroll", placeTour, true);
 }
@@ -2023,16 +2046,16 @@ function showTourStep(i) {
   tourEl().innerHTML = `<div class="tour-ring" hidden></div>
     <div class="tour-card ${st.hero ? "tour-hero" : ""}" role="dialog" aria-modal="false" aria-labelledby="tour-title">
       ${st.hero ? `<div class="tour-mark" aria-label="${APP_NAME}">${[...APP_NAME].map((c) => `<span>${esc(c)}</span>`).join("")}<i class="tour-cursor"></i></div>` : ""}
-      <div class="tour-count">${i === 0 ? "Live demo" : `${i} of ${TOUR_STEPS.length - 1}`}</div>
+      <div class="tour-count">${i === 0 ? (DEMO ? "Live demo" : "Welcome") : `${i} of ${TOUR_STEPS.length - 1}`}</div>
       <h3 id="tour-title">${st.title}</h3>
       <p>${st.body()}</p>
-      ${st.hero ? `<p class="tour-hint">You can reopen it anytime from <b>Tour</b> in the bar above, or ${MOD_LABEL}+K → “tour”.</p>` : ""}
+      ${st.hero ? `<p class="tour-hint">You can reopen it anytime from ${TOUR_REOPEN()}.</p>` : ""}
       <div class="tour-actions">
         ${i === 0 ? `<button type="button" class="btn ghost small" data-tour="skip">Skip, I'll explore</button><button type="button" class="btn primary small" data-tour="next">Show me around</button>`
         : `<button type="button" class="tour-skip" data-tour="skip">${last ? "" : "Skip tour"}</button>
            <span class="tour-dots">${TOUR_STEPS.slice(1).map((_, k) => `<i class="${k + 1 === i ? "on" : ""}"></i>`).join("")}</span>
            <button type="button" class="btn ghost small" data-tour="back">Back</button>
-           ${last ? `<a class="btn small" href="${SELF_HOST}" data-tour="done">Self-host it</a><button type="button" class="btn primary small" data-tour="done">Start exploring</button>`
+           ${last ? `${st.cta ? `<a class="btn small" href="${SELF_HOST}" data-tour="done">Self-host it</a>` : ""}<button type="button" class="btn primary small" data-tour="done">${S.families.length ? "Start exploring" : "Got it"}</button>`
                   : `<button type="button" class="btn primary small" data-tour="next">Next</button>`}`}
       </div></div>`;
   requestAnimationFrame(placeTour);
@@ -2048,6 +2071,8 @@ async function animateTourMark() {
   clearInterval(markTimer);
   const spans = $$(".tour-mark span", tourEl());
   const finalFam = S.byKey.get("fraunces") || S.byKey.get("playfair-display") || S.families[0];
+  const markEl = tourEl()?.querySelector(".tour-mark");
+  if (!finalFam) { markEl?.classList.add("done", "plain"); return; }  // empty library: nothing to cycle through
   let pool = MARK_FONTS.map((k) => S.byKey.get(k)).filter(Boolean);
   if (pool.length < 6) pool = pool.concat(S.families.filter((f) => f.category === "display" || f.category === "script").slice(0, 12 - pool.length));
   const ready = (await Promise.all([finalFam, ...pool].map((f) => Promise.race([loadFace(f.rep).then((ok) => (ok ? f : null)), new Promise((r) => setTimeout(() => r(null), 1500))])))).filter(Boolean);
@@ -2069,6 +2094,7 @@ async function animateTourMark() {
 }
 function startTour() {
   if (route().name !== "all") location.hash = "#/";
+  TOUR_STEPS = tourSteps();
   clearInterval(markTimer);
   tourEl()?.remove();
   document.body.insertAdjacentHTML("beforeend", `<div id="tour" class="tour"></div>`);
@@ -2118,8 +2144,8 @@ document.addEventListener("keydown", (e) => {
   addEventListener("hashchange", render);
   render();
   $("#demo-tour")?.addEventListener("click", () => setTimeout(startTour));
-  // first visit to the demo gallery: offer the welcome tour once
-  if (DEMO && !store.get("welcomed", false) && route().name === "all") setTimeout(startTour, 900);
+  // first visit to the gallery: offer the welcome tour once
+  if (!store.get("welcomed", false) && route().name === "all") setTimeout(startTour, 900);
   // While the first index is still being built, keep refreshing.
   const watch = async () => {
     if (!S.lib.scan.scanning) return;

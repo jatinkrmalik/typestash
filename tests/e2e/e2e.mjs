@@ -20,6 +20,8 @@ const api = async (p, opts) => { const r = await fetch(BASE + p.replace(/^\//, "
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
 await ctx.grantPermissions(["clipboard-read", "clipboard-write"], { origin: BASE.replace(/\/$/, "") });
+const seen = () => localStorage.setItem("tc.welcomed", "true");
+await ctx.addInitScript(seen);
 const page = await ctx.newPage();
 const consoleErrors = [], badResponses = [];
 page.on("pageerror", (e) => consoleErrors.push("pageerror: " + e.message));
@@ -338,7 +340,9 @@ try {
 
   // ---------------------------------------------------------------- phone layout
   sec("Phone layout");
-  const ph = await (await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })).newPage();
+  const phCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  await phCtx.addInitScript(seen);
+  const ph = await phCtx.newPage();
   ph.on("pageerror", (e) => consoleErrors.push("phone: " + e.message));
   await ph.goto(BASE + "#/"); await ph.waitForTimeout(1500);
   ok("no sideways scroll", !(await ph.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
@@ -348,9 +352,33 @@ try {
   ok("drawer link navigates and closes", ph.url().endsWith("#/fav") && (await ph.locator(".layout.drawer-open").count()) === 0);
   await ph.goto(BASE + "#/f/fraunces"); await ph.waitForTimeout(1500);
   ok("family page on phone", !(await ph.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
-  const fold = await (await browser.newContext({ viewport: { width: 840, height: 900 } })).newPage();
+  const foldCtx = await browser.newContext({ viewport: { width: 840, height: 900 } });
+  await foldCtx.addInitScript(seen);
+  const fold = await foldCtx.newPage();
   await fold.goto(BASE + "#/"); await fold.waitForTimeout(1200);
   ok("foldable width keeps the sidebar", await fold.locator(".side").evaluate((e) => e.getBoundingClientRect().left === 0 && getComputedStyle(e).position !== "fixed"));
+
+  // ---------------------------------------------------------------- welcome tour
+  sec("Welcome tour");
+  const tp = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+  tp.on("pageerror", (e) => consoleErrors.push("tour: " + e.message));
+  await tp.goto(BASE + "#/"); await tp.waitForTimeout(2200);
+  ok("shows on a first visit", await tp.locator(".tour-card.tour-hero").isVisible(), await tp.locator(".tour-card h3").innerText().catch(() => ""));
+  ok("animated wordmark settles", (await tp.locator(".tour-mark.done").count()) === 1 || (await tp.waitForTimeout(1500), (await tp.locator(".tour-mark.done").count()) === 1));
+  await tp.click("[data-tour=next]"); await tp.waitForTimeout(300);
+  let stepsSeen = 1;
+  while ((await tp.locator("[data-tour=next]").count()) && stepsSeen < 10) { await tp.click("[data-tour=next]"); await tp.waitForTimeout(250); stepsSeen++; }
+  ok("walks through every step", (await tp.locator("button[data-tour=done]").count()) === 1, `${stepsSeen + 1} steps`);
+  await tp.keyboard.press("Escape"); await tp.waitForTimeout(300);
+  ok("Esc closes it and says how to reopen", (await tp.locator("#tour").count()) === 0 && /reopen/i.test(await tp.locator(".toast").last().innerText()));
+  await tp.reload(); await tp.waitForTimeout(2200);
+  ok("never comes back on its own", (await tp.locator("#tour").count()) === 0);
+  await tp.goto(BASE + "#/settings"); await tp.waitForTimeout(600);
+  await tp.click('[data-act="tour"]'); await tp.waitForTimeout(800);
+  ok("Settings replays it", await tp.locator(".tour-card.tour-hero").isVisible() && tp.url().endsWith("#/"));
+  await tp.click("[data-tour=skip]"); await tp.waitForTimeout(200);
+  await tp.keyboard.press("Control+K"); await tp.keyboard.type("welcome tour"); await tp.waitForTimeout(300); await tp.keyboard.press("Enter"); await tp.waitForTimeout(700);
+  ok("command bar replays it", await tp.locator(".tour-card").isVisible());
 
   // ---------------------------------------------------------------- footer
   sec("Footer & links");
