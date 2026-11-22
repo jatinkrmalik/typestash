@@ -59,6 +59,92 @@
       "installUrl": "https://typestash.j47.in/#self-host",
       "sameAs": ["https://github.com/jatinkrmalik/typestash"],
       "author": { "@type": "Person", "name": "Jatin K Malik", "url": "https://jatinkrmalik.com" }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://typestash.j47.in/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Typestash?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A self-hosted font library and font manager. Point it at a folder of fonts on your server or NAS and you get a searchable web gallery with live previews, a type tester, glyph maps, side-by-side compare, collections and downloads, from any browser on any device."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it a FontBase or NexusFont alternative?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For browsing, previewing, comparing and organising, yes, with one difference: desktop font managers live on one computer, while Typestash runs on your server and works in any browser. It doesn't install fonts into your operating system yet; syncing a collection to your desktop is on the roadmap."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I install it?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "One Docker command (see Self-host it above). There's also a Docker Compose file and an Unraid template in the repo, or you can run it without Docker on Python 3.11+. Then open port 8080 and drop some fonts on the page."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which font formats does it support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TTF, OTF, WOFF and WOFF2, plus TTC/OTC collections, where every face inside is listed on its own. You can also upload .zip archives of fonts."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will it change or delete my font files?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Typestash only reads your fonts folder. New uploads are added under Uploads/<Family>/, duplicates are skipped, and nothing is ever modified or deleted."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use my fonts as web fonts on my own sites?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Not yet. That's the next big feature: a self-hosted font registry that serves the families you choose as web fonts, Google Fonts style, with licence checks, since not every font is allowed on the web."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it need the internet, or track me?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. It runs entirely on your own hardware and works offline on your local network. There are no accounts, no telemetry and no calls home."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I put it behind a password?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Set TYPESTASH_PASSWORD for built-in basic auth, or put it behind your reverse proxy's login (Authelia, Authentik and the like) or a VPN such as Tailscale."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it run on a Raspberry Pi or an ARM NAS?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The image is built for both amd64 and arm64, so it runs on Raspberry Pi 4 and 5, Apple Silicon and most ARM-based NAS boxes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Typestash is free and open source under the MIT licence. If it's useful to you, you can sponsor it."
+          }
+        }
+      ]
     }
   ]
 }
@@ -203,6 +289,23 @@ kbd { font: 500 12.5px/1 var(--mono); padding: 3px 6px; border-radius: 5px; bord
 .host .btn.ghost { border-color: rgba(244, 239, 230, .3); color: var(--paper); }
 .host .btn.ghost:hover { border-color: var(--paper); }
 
+/* faq */
+.faq { padding: 130px 0 40px; }
+.faq .section-head { margin-bottom: 48px; }
+.faq-list { max-width: 760px; margin: 0 auto; border-top: 1px solid var(--line-2); }
+.faq details { border-bottom: 1px solid var(--line-2); }
+.faq summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px 2px; font: 560 21px/1.3 var(--serif); font-variation-settings: "opsz" 144, "SOFT" 30; letter-spacing: -.01em; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; flex: none; font: 400 24px/1 var(--sans); color: var(--muted); transition: transform .2s; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq summary:hover { color: var(--ink-2); }
+.faq summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 4px; }
+.faq details p { margin: -6px 0 22px; max-width: 680px; color: var(--ink-2); font-size: 16.5px; }
+.faq details a { color: var(--ink); }
+.faq code { font: 14px var(--mono); background: var(--card); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; }
+@media (max-width: 640px) { .faq { padding-top: 90px; } .faq summary { font-size: 18.5px; padding: 17px 0; } }
+
 /* footer */
 footer { padding: 56px 0 64px; font-size: 15px; color: var(--muted); }
 footer .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; }
@@ -241,6 +344,7 @@ footer .fine a:hover { color: var(--ink); }
     <nav class="nav-links">
       <a href="#features">Features</a>
       <a href="#self-host">Self-host</a>
+      <a href="#faq">FAQ</a>
       <a href="https://github.com/jatinkrmalik/typestash">GitHub</a>
       <a class="btn primary small" href="demo/">Live demo</a>
     </nav>
@@ -406,6 +510,27 @@ footer .fine a:hover { color: var(--ink); }
     <div class="ctas">
       <a class="btn primary" href="demo/">Try the live demo first</a>
       <a class="btn ghost" href="https://github.com/jatinkrmalik/typestash#quick-start">Read the docs</a>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="label">Questions</div>
+      <h2>Frequently <em>asked.</em></h2>
+    </div>
+    <div class="faq-list">
+      <details open><summary>What is Typestash?</summary><p>A self-hosted font library and font manager. Point it at a folder of fonts on your server or NAS and you get a searchable web gallery with live previews, a type tester, glyph maps, side-by-side compare, collections and downloads, from any browser on any device.</p></details>
+      <details><summary>Is it a FontBase or NexusFont alternative?</summary><p>For browsing, previewing, comparing and organising, yes, with one difference: desktop font managers live on one computer, while Typestash runs on your server and works in any browser. It doesn't install fonts into your operating system yet; syncing a collection to your desktop is on the <a href="https://github.com/jatinkrmalik/typestash/blob/main/ROADMAP.md">roadmap</a>.</p></details>
+      <details><summary>How do I install it?</summary><p>One Docker command (see <a href="#self-host">Self-host it</a> above). There's also a Docker Compose file and an Unraid template in the repo, or you can run it without Docker on Python 3.11+. Then open port 8080 and drop some fonts on the page.</p></details>
+      <details><summary>Which font formats does it support?</summary><p>TTF, OTF, WOFF and WOFF2, plus TTC/OTC collections, where every face inside is listed on its own. You can also upload .zip archives of fonts.</p></details>
+      <details><summary>Will it change or delete my font files?</summary><p>No. Typestash only reads your fonts folder. New uploads are added under <code>Uploads/&lt;Family&gt;/</code>, duplicates are skipped, and nothing is ever modified or deleted.</p></details>
+      <details><summary>Can I use my fonts as web fonts on my own sites?</summary><p>Not yet. That's the next big feature: a self-hosted font registry that serves the families you choose as web fonts, Google Fonts style, with licence checks, since not every font is allowed on the web.</p></details>
+      <details><summary>Does it need the internet, or track me?</summary><p>No. It runs entirely on your own hardware and works offline on your local network. There are no accounts, no telemetry and no calls home.</p></details>
+      <details><summary>Can I put it behind a password?</summary><p>Yes. Set <code>TYPESTASH_PASSWORD</code> for built-in basic auth, or put it behind your reverse proxy's login (Authelia, Authentik and the like) or a VPN such as Tailscale.</p></details>
+      <details><summary>Does it run on a Raspberry Pi or an ARM NAS?</summary><p>Yes. The image is built for both amd64 and arm64, so it runs on Raspberry Pi 4 and 5, Apple Silicon and most ARM-based NAS boxes.</p></details>
+      <details><summary>Is it free?</summary><p>Yes. Typestash is free and open source under the MIT licence. If it's useful to you, you can <a href="https://github.com/sponsors/jatinkrmalik">sponsor it</a>.</p></details>
     </div>
   </div>
 </section>
