@@ -1970,7 +1970,7 @@ document.addEventListener("input", (e) => {
 // (Skip, Esc, or clicking outside), never shown again after, and replayable from
 // the command bar.
 const TOUR_STEPS = [
-  { title: "Welcome to the Typestash demo",
+  { title: "Welcome to the live demo", hero: true,
     body: () => `This is a real Typestash with ${S.families.length} open-licensed font families. Nothing to install, nothing to sign up for. Want a 30-second tour of where things are?` },
   { sel: ".field.search", title: "Search and filter",
     body: () => "Filter by name, designer or folder. The chips below narrow it to sans, serif, mono, script, variable fonts, italics or a writing system." },
@@ -1986,10 +1986,12 @@ const TOUR_STEPS = [
 ];
 let tourStep = -1;
 function tourEl() { return $("#tour"); }
-function endTour() {
+function endTour(quiet = false) {
   store.set("welcomed", true);
   tourStep = -1;
+  clearInterval(markTimer);
   tourEl()?.remove();
+  if (!quiet) toast(`Reopen the tour anytime from <b>Tour</b> in the bar above, or <kbd>${MOD_LABEL}</kbd> <kbd>K</kbd> → “tour”.`, { raw: true });
   removeEventListener("resize", placeTour);
   removeEventListener("scroll", placeTour, true);
 }
@@ -2019,10 +2021,12 @@ function showTourStep(i) {
   const target = st.sel && $(st.sel);
   if (target) target.scrollIntoView({ block: "center", behavior: "instant" });
   tourEl().innerHTML = `<div class="tour-ring" hidden></div>
-    <div class="tour-card" role="dialog" aria-modal="false" aria-labelledby="tour-title">
+    <div class="tour-card ${st.hero ? "tour-hero" : ""}" role="dialog" aria-modal="false" aria-labelledby="tour-title">
+      ${st.hero ? `<div class="tour-mark" aria-label="${APP_NAME}">${[...APP_NAME].map((c) => `<span>${esc(c)}</span>`).join("")}<i class="tour-cursor"></i></div>` : ""}
       <div class="tour-count">${i === 0 ? "Live demo" : `${i} of ${TOUR_STEPS.length - 1}`}</div>
       <h3 id="tour-title">${st.title}</h3>
       <p>${st.body()}</p>
+      ${st.hero ? `<p class="tour-hint">You can reopen it anytime from <b>Tour</b> in the bar above, or ${MOD_LABEL}+K → “tour”.</p>` : ""}
       <div class="tour-actions">
         ${i === 0 ? `<button type="button" class="btn ghost small" data-tour="skip">Skip, I'll explore</button><button type="button" class="btn primary small" data-tour="next">Show me around</button>`
         : `<button type="button" class="tour-skip" data-tour="skip">${last ? "" : "Skip tour"}</button>
@@ -2033,9 +2037,39 @@ function showTourStep(i) {
       </div></div>`;
   requestAnimationFrame(placeTour);
   $("[data-tour=next], [data-tour=done]:last-child", tourEl())?.focus();
+  if (st.hero) animateTourMark();
+}
+// The wordmark flickers through a few characterful fonts from the library, then each
+// letter settles into the final face, like the intro video.
+const MARK_FONTS = ["lobster", "bungee", "monoton", "pacifico", "abril-fatface", "caveat", "space-mono", "righteous",
+  "shrikhand", "dm-serif-display", "rubik-mono-one", "silkscreen", "syne", "permanent-marker", "playfair-display", "bebas-neue"];
+let markTimer = 0;
+async function animateTourMark() {
+  clearInterval(markTimer);
+  const spans = $$(".tour-mark span", tourEl());
+  const finalFam = S.byKey.get("fraunces") || S.byKey.get("playfair-display") || S.families[0];
+  let pool = MARK_FONTS.map((k) => S.byKey.get(k)).filter(Boolean);
+  if (pool.length < 6) pool = pool.concat(S.families.filter((f) => f.category === "display" || f.category === "script").slice(0, 12 - pool.length));
+  const ready = (await Promise.all([finalFam, ...pool].map((f) => Promise.race([loadFace(f.rep).then((ok) => (ok ? f : null)), new Promise((r) => setTimeout(() => r(null), 1500))])))).filter(Boolean);
+  const fin = ready[0] === finalFam ? ff(finalFam.rep) : "";
+  const faces = ready.slice(1).map((f) => ff(f.rep));
+  const settle = () => { spans.forEach((s) => { s.style.fontFamily = fin; s.classList.add("set"); }); tourEl()?.querySelector(".tour-mark")?.classList.add("done"); };
+  if (!faces.length || matchMedia("(prefers-reduced-motion: reduce)").matches) return settle();
+  const t0 = performance.now(), start = 650, gap = 130;
+  markTimer = setInterval(() => {
+    if (!spans[0]?.isConnected) return clearInterval(markTimer);
+    const t = performance.now() - t0;
+    spans.forEach((s, i) => {
+      if (s.classList.contains("set")) return;
+      if (t > start + i * gap) { s.style.fontFamily = fin; s.classList.add("set"); return; }
+      s.style.fontFamily = faces[Math.floor(Math.random() * faces.length)];
+    });
+    if (spans.every((s) => s.classList.contains("set"))) { clearInterval(markTimer); settle(); }
+  }, 90);
 }
 function startTour() {
   if (route().name !== "all") location.hash = "#/";
+  clearInterval(markTimer);
   tourEl()?.remove();
   document.body.insertAdjacentHTML("beforeend", `<div id="tour" class="tour"></div>`);
   addEventListener("resize", placeTour);
@@ -2048,11 +2082,11 @@ document.addEventListener("click", (e) => {
     const a = b.dataset.tour;
     if (a === "next") showTourStep(tourStep + 1);
     else if (a === "back") showTourStep(Math.max(0, tourStep - 1));
-    else endTour();
+    else endTour(b.tagName === "A");  // following the Self-host link needs no hint
     return;
   }
   // clicking anywhere outside the card ends the tour: it should never get in the way
-  if (tourStep >= 0 && !e.target.closest(".tour-card")) endTour();
+  if (tourStep >= 0 && !e.target.closest(".tour-card, #demo-tour")) endTour();
 }, true);
 document.addEventListener("keydown", (e) => {
   if (tourStep < 0) return;
@@ -2069,6 +2103,7 @@ document.addEventListener("keydown", (e) => {
       <a class="demo-home" href="${HOME}"><span aria-hidden="true">←</span> Typestash</a>
       <div class="demo-msg"><span class="demo-tag">Live demo</span>
         <span class="demo-txt">Read-only, with <span id="demo-count">hundreds of</span> open-licensed Google Fonts. Favourites and collections stay in this browser.</span></div>
+      <button type="button" class="demo-tour" id="demo-tour" title="Show the welcome tour">Tour</button>
       <a class="demo-cta" href="${SELF_HOST}">Self-host it <span aria-hidden="true">→</span></a>
     </div>`);
   }
@@ -2082,6 +2117,7 @@ document.addEventListener("keydown", (e) => {
   if (DEMO && $("#demo-count")) $("#demo-count").textContent = S.families.length;
   addEventListener("hashchange", render);
   render();
+  $("#demo-tour")?.addEventListener("click", () => setTimeout(startTour));
   // first visit to the demo gallery: offer the welcome tour once
   if (DEMO && !store.get("welcomed", false) && route().name === "all") setTimeout(startTour, 900);
   // While the first index is still being built, keep refreshing.
