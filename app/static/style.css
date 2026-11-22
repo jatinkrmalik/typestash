@@ -502,8 +502,25 @@ textarea.note { width: 100%; min-height: 90px; border: 1px solid var(--line-2); 
 @media (max-width: 700px) { .toolbar { position: static; } }
 
 /* demo banner (GitHub Pages build) */
-.demo-bar { background: var(--ink); color: var(--paper); text-align: center; font-size: 13px; padding: 8px 16px; }
-.demo-bar a { color: var(--accent); font-weight: 650; margin-left: 6px; }
+/* live demo bar: obvious, but in the theme's own ink rather than shouting */
+.demo-bar {
+  display: flex; align-items: center; gap: 16px; min-height: 52px; padding: 8px 20px;
+  background: var(--ink); color: var(--paper); font-size: 14px; line-height: 1.35;
+}
+.demo-bar a { color: inherit; text-decoration: none; }
+.demo-home { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--paper) 28%, transparent); font-weight: 600; }
+.demo-home:hover { border-color: var(--paper); }
+.demo-msg { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 12px; text-align: center; }
+.demo-tag { flex: none; display: inline-flex; align-items: center; gap: 7px; font: 700 11.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+  padding: 6px 10px; border-radius: 999px; background: color-mix(in srgb, var(--paper) 14%, transparent); }
+.demo-tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #3fcf8e; box-shadow: 0 0 0 3px color-mix(in srgb, #3fcf8e 30%, transparent); }
+.demo-txt { opacity: .8; }
+.demo-cta { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 16px; border-radius: 999px;
+  background: var(--paper); color: var(--ink) !important; font-weight: 650; }
+.demo-cta:hover { background: color-mix(in srgb, var(--paper) 85%, var(--accent)); }
+@media (max-width: 900px) { .demo-txt { display: none; } }
+@media (max-width: 420px) { .demo-bar { padding: 8px 12px; gap: 8px; } .demo-home, .demo-cta { padding: 0 11px; font-size: 13px; } .demo-tag { letter-spacing: .06em; } }
 
 /* ---------------------------------------------------------------- site footer */
 .site-foot { margin: 64px 0 0; padding: 32px 0 8px; border-top: 1px dashed var(--line-2); color: var(--muted); }

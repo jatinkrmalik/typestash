@@ -19,6 +19,9 @@ const store = {
 // notes and collections kept in this browser's localStorage.
 const DEMO = window.TYPESTASH_DEMO || null;
 const REPO = (DEMO && DEMO.repo) || "https://github.com/jatinkrmalik/typestash";
+// The demo lives at /demo/ under the landing page; its self-host section has the Docker command.
+const HOME = (DEMO && DEMO.home) || "../";
+const SELF_HOST = `${HOME}#self-host`;
 const U = {
   font: (id) => DEMO ? `demo/fonts/${id}` : `font/${id}`,
   face: (id) => DEMO ? `demo/fonts/${id}` : `download/${id}`,
@@ -107,7 +110,7 @@ async function demoApi(path, opts) {
   throw new Error("Not available in the demo");
 }
 function demoReadOnly() {
-  toast(`This is a read-only demo. <a href="${REPO}" target="_blank" rel="noopener">Self-host Typestash</a> to add your own fonts.`, { raw: true });
+  toast(`This is a read-only demo. <a href="${SELF_HOST}">Self-host Typestash</a> to add your own fonts.`, { raw: true });
 }
 
 async function api(path, opts = {}) {
@@ -1964,8 +1967,12 @@ document.addEventListener("input", (e) => {
 (async function boot() {
   document.title = DEMO ? `${APP_NAME} · live demo` : APP_NAME;
   if (DEMO) {
-    document.body.insertAdjacentHTML("afterbegin", `<div class="demo-bar"><b>Live demo</b> with free Google Fonts. Favourites, notes and collections stay in your browser.
-      <a href="${REPO}" target="_blank" rel="noopener">Self-host it with one Docker command →</a></div>`);
+    document.body.insertAdjacentHTML("afterbegin", `<div class="demo-bar" role="region" aria-label="Live demo">
+      <a class="demo-home" href="${HOME}"><span aria-hidden="true">←</span> Typestash</a>
+      <div class="demo-msg"><span class="demo-tag">Live demo</span>
+        <span class="demo-txt">Read-only, with <span id="demo-count">hundreds of</span> open-licensed Google Fonts. Favourites and collections stay in this browser.</span></div>
+      <a class="demo-cta" href="${SELF_HOST}">Self-host it <span aria-hidden="true">→</span></a>
+    </div>`);
   }
   applyTheme();
   try {
@@ -1974,6 +1981,7 @@ document.addEventListener("input", (e) => {
     $("#view").innerHTML = `<div class="empty"><div class="big">!</div><h2>Can't reach the library</h2><p>${esc(e.message)}</p></div>`;
     return;
   }
+  if (DEMO && $("#demo-count")) $("#demo-count").textContent = S.families.length;
   addEventListener("hashchange", render);
   render();
   // While the first index is still being built, keep refreshing.

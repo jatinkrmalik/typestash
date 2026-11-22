@@ -18,153 +18,148 @@
   if (location.hash.startsWith("#/")) location.replace("demo/" + location.hash);
 </script>
 <style>
-@font-face { font-family: "Fraunces"; src: url("assets/fraunces.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Fraunces"; src: url("assets/fraunces.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Fraunces"; src: url("assets/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; font-style: italic; font-display: swap; }
 :root {
-  --paper: #f3eee4; --paper-2: #e9e2d4; --card: #fffdf8; --ink: #17140f; --ink-2: #3a342b; --muted: #6b6257;
-  --line: rgba(23, 20, 15, .12); --accent: #ff4a1c; --accent-ink: #fff; --ok: #12a36b;
+  --paper: #f4efe6; --paper-2: #ebe4d7; --card: #fbf8f2; --ink: #1a1712; --ink-2: #4a433a; --muted: #7a7064;
+  --line: rgba(26, 23, 18, .12); --line-2: rgba(26, 23, 18, .2);
+  --accent: #d9481f;           /* used sparingly: the cursor and the shell prompt */
   --serif: "Fraunces", Georgia, serif;
   --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
-  --wrap: 1180px;
+  --wrap: 1160px;
+  --shadow: 0 1px 2px rgba(26, 23, 18, .06), 0 12px 32px -8px rgba(26, 23, 18, .14), 0 40px 80px -24px rgba(26, 23, 18, .18);
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
-body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background-image: radial-gradient(rgba(23, 20, 15, .07) 1.2px, transparent 1.3px); background-size: 28px 28px; }
 a { color: inherit; }
 img { max-width: 100%; height: auto; display: block; }
+figure { margin: 0; }
 .wrap { width: min(var(--wrap), 100% - 32px); margin: 0 auto; }
-.serif { font-family: var(--serif); font-variation-settings: "opsz" 144, "SOFT" 50; }
-h1, h2, h3 { font-family: var(--serif); font-variation-settings: "opsz" 144, "SOFT" 50; font-weight: 650; letter-spacing: -.02em; line-height: 1.04; margin: 0; }
-em.acc { color: var(--accent); font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1; }
-.kicker { font: 700 13px/1.5 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
-h1, h2, h3, .kicker { text-wrap: balance; }
+h1, h2, h3, h4 { font-family: var(--serif); font-variation-settings: "opsz" 144, "SOFT" 30; font-weight: 560; letter-spacing: -.022em; line-height: 1.02; margin: 0; }
+h1 em, h2 em { font-style: italic; font-weight: 420; font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; color: var(--ink-2); }
+.label { font: 500 13px/1.4 var(--mono); color: var(--muted); letter-spacing: .02em; }
+h1, h2, h3 { text-wrap: balance; }
 p, li { text-wrap: pretty; }
+.cursor { display: inline-block; width: .09em; height: .74em; margin-left: .08em; background: var(--accent); vertical-align: -.02em; animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
 
 /* nav */
-.nav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-.nav .wrap { display: flex; align-items: center; gap: 22px; height: 64px; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 650 23px/1 var(--serif); font-variation-settings: "opsz" 144, "SOFT" 50; letter-spacing: -.02em; }
-.brand img { width: 34px; height: 34px; border-radius: 9px; }
-.nav-links { display: flex; gap: 22px; margin-left: auto; font-size: 15px; }
-.nav-links a { text-decoration: none; color: var(--ink-2); }
-.nav-links a:hover { color: var(--accent); }
-.btn { display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 20px; border-radius: 12px; border: 2px solid var(--ink);
-  font: 650 15.5px/1 var(--sans); text-decoration: none; white-space: nowrap; cursor: pointer; transition: transform .12s, box-shadow .12s, background .15s; }
-.btn.primary { background: var(--accent); color: var(--accent-ink); box-shadow: 4px 4px 0 var(--ink); }
-.btn.primary:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
-.btn.ghost { background: var(--card); color: var(--ink); }
-.btn.ghost:hover { background: var(--paper-2); }
-.btn.small { height: 38px; padding: 0 14px; font-size: 14px; box-shadow: 3px 3px 0 var(--ink); }
-.btn svg { width: 18px; height: 18px; flex: none; }
+.nav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; align-items: center; gap: 26px; height: 62px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 560 22px/1 var(--serif); font-variation-settings: "opsz" 144, "SOFT" 30; letter-spacing: -.02em; }
+.brand img { width: 30px; height: 30px; border-radius: 8px; }
+.nav-links { display: flex; align-items: center; gap: 26px; margin-left: auto; font-size: 15px; }
+.nav-links a:not(.btn) { text-decoration: none; color: var(--ink-2); }
+.nav-links a:not(.btn):hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.btn { display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 22px; border-radius: 999px; border: 1px solid transparent;
+  font: 560 15.5px/1 var(--sans); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; }
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn.primary:hover { background: #000; transform: translateY(-1px); }
+.btn.ghost { border-color: var(--line-2); color: var(--ink); }
+.btn.ghost:hover { border-color: var(--ink); }
+.btn.small { height: 36px; padding: 0 16px; font-size: 14px; }
+.btn svg { width: 17px; height: 17px; flex: none; transition: transform .15s; }
+.btn:hover svg.arrow { transform: translateX(3px); }
 
 /* hero */
-.hero { padding: 72px 0 40px; text-align: center; }
-.hero h1 { font-size: clamp(46px, 8.2vw, 104px); margin: 18px auto 0; max-width: 13ch; }
-.hero .lede { max-width: 640px; margin: 26px auto 0; font-size: clamp(17px, 2.1vw, 20px); color: var(--ink-2); }
-.ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 34px; }
-.facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; margin-top: 22px; font: 13.5px var(--mono); color: var(--muted); }
-.facts span::before { content: "✓ "; color: var(--ok); font-weight: 700; }
-.shot { position: relative; margin: 64px auto 0; max-width: 1080px; }
-.frame { border: 2px solid var(--ink); border-radius: 18px; overflow: hidden; background: var(--card); box-shadow: 12px 12px 0 var(--ink), 0 40px 80px rgba(23, 20, 15, .15); }
-.frame .bar { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; background: var(--paper-2); border-bottom: 2px solid var(--ink); }
-.frame .bar i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; border: 1px solid rgba(0,0,0,.15); }
-.frame .bar i:nth-child(2) { background: #febc2e; } .frame .bar i:nth-child(3) { background: #28c840; }
-.frame .bar span { margin-left: 14px; flex: 0 1 380px; height: 24px; border-radius: 7px; background: var(--card); border: 1px solid var(--line);
-  font: 12.5px/22px var(--mono); color: var(--muted); padding: 0 10px; text-align: left; overflow: hidden; white-space: nowrap; }
-.sticker { position: absolute; font: 700 clamp(13px, 1.6vw, 18px)/1 var(--mono); padding: 12px 18px; border-radius: 999px; border: 2px solid var(--ink);
-  background: var(--card); box-shadow: 4px 4px 0 var(--ink); white-space: nowrap; animation: bob 5s ease-in-out infinite; }
-.sticker.s1 { left: -34px; top: 34%; rotate: -6deg; }
-.sticker.s2 { right: -30px; top: 12%; rotate: 5deg; background: var(--accent); color: #fff; animation-delay: -2.5s; }
-.sticker.s3 { right: 6%; bottom: -22px; rotate: -3deg; animation-delay: -1.2s; }
-@keyframes bob { 50% { translate: 0 -8px; } }
+.hero { padding: 88px 0 24px; text-align: center; }
+.hero h1 { font-size: clamp(48px, 8.4vw, 112px); margin: 22px auto 0; max-width: 12ch; }
+.hero .lede { max-width: 600px; margin: 28px auto 0; font-size: clamp(17px, 2.1vw, 19.5px); color: var(--ink-2); }
+.ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 36px; }
+.facts { margin-top: 22px; font: 13px var(--mono); color: var(--muted); }
+.shot { margin: 72px auto 0; max-width: 1100px; }
+.frame { border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; background: var(--card); box-shadow: var(--shadow); }
+.frame .bar { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px; background: var(--paper-2); border-bottom: 1px solid var(--line); }
+.frame .bar i { width: 10px; height: 10px; border-radius: 50%; background: rgba(26, 23, 18, .16); }
+.frame .bar span { margin: 0 auto; transform: translateX(-24px); font: 12px var(--mono); color: var(--muted); }
+figcaption { margin-top: 16px; font: italic 400 15px/1.4 var(--serif); color: var(--muted); }
 
-/* problem strip */
-.problem { padding: 110px 0 30px; text-align: center; overflow: hidden; }
-.problem h2 { font-size: clamp(40px, 6.4vw, 80px); }
-.problem p { max-width: 620px; margin: 20px auto 0; color: var(--ink-2); font-size: 18px; }
-.marquee { margin-top: 44px; display: grid; gap: 14px; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
-.row { display: flex; gap: 14px; width: max-content; animation: slide 60s linear infinite; }
-.row.r2 { animation-direction: reverse; animation-duration: 70s; }
-.row span { font: 500 15px/1 var(--mono); padding: 11px 15px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 4px 14px rgba(23, 20, 15, .06); white-space: nowrap; }
-.row span b { color: var(--muted); font-weight: 400; margin-right: 6px; }
-.row span.d b { color: var(--accent); }
+/* problem */
+.problem { padding: 130px 0 20px; text-align: center; overflow: hidden; }
+.problem h2 { font-size: clamp(40px, 6.2vw, 78px); }
+.problem p { max-width: 600px; margin: 24px auto 0; color: var(--ink-2); font-size: 18px; }
+.marquee { margin-top: 52px; display: grid; gap: 12px; mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
+.row { display: flex; gap: 12px; width: max-content; animation: slide 70s linear infinite; }
+.row.r2 { animation-direction: reverse; animation-duration: 80s; }
+.row span { font: 14px/1 var(--mono); padding: 10px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap; }
+.row span b { color: var(--muted); font-weight: 400; margin-right: 7px; }
 @keyframes slide { to { transform: translateX(-50%); } }
 
 /* features */
-.features { padding: 100px 0 40px; }
-.section-head { text-align: center; max-width: 760px; margin: 0 auto 70px; }
-.section-head h2 { font-size: clamp(38px, 5.4vw, 66px); margin-top: 14px; }
-.section-head p { color: var(--ink-2); font-size: 18px; margin: 18px 0 0; }
-.feature { display: grid; grid-template-columns: 1fr 1.35fr; gap: 64px; align-items: center; margin-bottom: 110px; }
-.feature.flip { grid-template-columns: 1.35fr 1fr; }
+.features { padding: 140px 0 40px; }
+.section-head { text-align: center; max-width: 720px; margin: 0 auto 96px; }
+.section-head h2 { font-size: clamp(38px, 5.2vw, 64px); margin-top: 14px; }
+.section-head p { color: var(--ink-2); font-size: 18px; margin: 20px 0 0; }
+.feature { display: grid; grid-template-columns: 1fr 1.4fr; gap: 72px; align-items: center; margin-bottom: 130px; }
+.feature.flip { grid-template-columns: 1.4fr 1fr; }
 .feature.flip .copy { order: 2; }
-.feature .num { font: 700 13px/1 var(--mono); color: var(--accent); letter-spacing: .14em; }
-.feature h3 { font-size: clamp(32px, 4vw, 48px); margin: 12px 0 16px; }
-.feature p { color: var(--ink-2); margin: 0 0 16px; }
-.feature ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-.feature li { padding-left: 26px; position: relative; color: var(--ink-2); font-size: 16px; }
-.feature li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 9px; height: 9px; border-radius: 3px; background: var(--accent); rotate: 45deg; }
-.feature .frame { box-shadow: 10px 10px 0 var(--ink); }
-kbd { font: 600 12.5px/1 var(--mono); padding: 3px 7px; border-radius: 6px; border: 1px solid var(--line); border-bottom-width: 2px; background: var(--card); }
+.feature .num { font: italic 400 22px/1 var(--serif); color: var(--muted); }
+.feature h3 { font-size: clamp(32px, 3.8vw, 46px); margin: 14px 0 18px; }
+.feature p { color: var(--ink-2); margin: 0 0 18px; }
+.feature ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.feature li { padding: 11px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); font-size: 15.5px; }
+kbd { font: 500 12.5px/1 var(--mono); padding: 3px 6px; border-radius: 5px; border: 1px solid var(--line-2); background: var(--card); color: var(--ink); }
 
-.grid6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.card { background: var(--card); border: 2px solid var(--ink); border-radius: 18px; padding: 26px 26px 24px; box-shadow: 5px 5px 0 var(--ink); transition: transform .15s, box-shadow .15s; }
-.card:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
-.card .ic { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: var(--paper-2); font-size: 22px; margin-bottom: 16px; }
-.card h4 { margin: 0 0 8px; font: 650 22px/1.15 var(--serif); font-variation-settings: "opsz" 144, "SOFT" 50; letter-spacing: -.01em; }
-.card p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
+.more { border-top: 1px solid var(--ink); padding-top: 22px; }
+.more > .label { margin-bottom: 30px; }
+.grid6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px 48px; }
+.grid6 h4 { font-size: 23px; letter-spacing: -.012em; margin-bottom: 8px; }
+.grid6 p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
 
 /* self-host */
-.host { margin-top: 110px; background: var(--ink); color: var(--paper); padding: 110px 0; position: relative; overflow: hidden; }
-.host::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(243, 238, 228, .07) 1.2px, transparent 1.3px); background-size: 28px 28px; }
-.host .wrap { position: relative; }
-.host .section-head p { color: rgba(243, 238, 228, .72); }
-.term { max-width: 900px; margin: 0 auto; border-radius: 18px; background: #0d0b08; border: 2px solid rgba(243, 238, 228, .2); box-shadow: 12px 12px 0 var(--accent); overflow: hidden; }
-.term .bar { display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border-bottom: 1px solid rgba(243, 238, 228, .12); }
-.term .bar i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; } .term .bar i:nth-child(2) { background: #febc2e; } .term .bar i:nth-child(3) { background: #28c840; }
-.term .bar span { margin-left: 12px; font: 13px var(--mono); color: rgba(243, 238, 228, .5); }
-.term .bar button { margin-left: auto; font: 600 13px var(--mono); color: var(--paper); background: rgba(243, 238, 228, .1); border: 1px solid rgba(243, 238, 228, .2); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
-.term .bar button:hover { background: var(--accent); border-color: var(--accent); }
-.term pre { margin: 0; padding: 26px 28px 28px; overflow-x: auto; font: 16px/1.7 var(--mono); color: var(--paper); }
+.host { margin-top: 140px; background: var(--ink); color: var(--paper); padding: 130px 0; }
+.host h2 em { color: rgba(244, 239, 230, .72); }
+.host .section-head { margin-bottom: 64px; }
+.host .section-head p { color: rgba(244, 239, 230, .7); }
+.host .label { color: rgba(244, 239, 230, .55); }
+.term { max-width: 860px; margin: 0 auto; border-radius: 14px; background: #0f0d0a; border: 1px solid rgba(244, 239, 230, .14); overflow: hidden; }
+.term .bar { display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px; border-bottom: 1px solid rgba(244, 239, 230, .1); }
+.term .bar i { width: 10px; height: 10px; border-radius: 50%; background: rgba(244, 239, 230, .18); }
+.term .bar span { margin-left: 10px; font: 12.5px var(--mono); color: rgba(244, 239, 230, .45); }
+.term .bar button { margin-left: auto; font: 500 12.5px var(--mono); color: rgba(244, 239, 230, .8); background: transparent; border: 1px solid rgba(244, 239, 230, .2); border-radius: 6px; padding: 5px 11px; cursor: pointer; }
+.term .bar button:hover { color: var(--paper); border-color: rgba(244, 239, 230, .5); }
+.term pre { margin: 0; padding: 26px 28px 28px; overflow-x: auto; font: 15.5px/1.75 var(--mono); color: var(--paper); }
 .term pre .p { color: var(--accent); user-select: none; }
-.term pre .c { color: rgba(243, 238, 228, .45); }
-.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 44px; }
-.chips a, .chips span { font: 600 15px/1 var(--mono); padding: 12px 18px; border-radius: 999px; border: 1.5px solid rgba(243, 238, 228, .22); background: rgba(243, 238, 228, .06); color: var(--paper); text-decoration: none; }
-.chips a:hover { border-color: var(--accent); color: var(--accent); }
-.host .ctas { margin-top: 44px; }
-.host .btn.ghost { background: transparent; color: var(--paper); border-color: rgba(243, 238, 228, .5); }
+.term pre .c { color: rgba(244, 239, 230, .4); }
+.links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 30px; margin-top: 40px; font-size: 15px; }
+.links a, .links span { color: rgba(244, 239, 230, .75); text-decoration: none; }
+.links a { border-bottom: 1px solid rgba(244, 239, 230, .3); padding-bottom: 2px; }
+.links a:hover { color: var(--paper); border-color: var(--paper); }
+.host .ctas { margin-top: 54px; }
+.host .btn.primary { background: var(--paper); color: var(--ink); }
+.host .btn.primary:hover { background: #fff; }
+.host .btn.ghost { border-color: rgba(244, 239, 230, .3); color: var(--paper); }
 .host .btn.ghost:hover { border-color: var(--paper); }
-.host .btn.primary { box-shadow: 4px 4px 0 var(--paper); border-color: var(--paper); }
 
 /* footer */
-footer { padding: 54px 0 60px; font-size: 15px; color: var(--muted); }
+footer { padding: 56px 0 64px; font-size: 15px; color: var(--muted); }
 footer .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; }
-footer .brand { color: var(--ink); font-size: 20px; }
-footer .brand img { width: 28px; height: 28px; }
-footer nav { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-left: auto; }
+footer .brand { color: var(--ink); font-size: 19px; }
+footer .brand img { width: 26px; height: 26px; }
+footer nav { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-left: auto; }
 footer nav a { text-decoration: none; color: var(--ink-2); }
-footer nav a:hover { color: var(--accent); }
-footer .fine { width: 100%; font-size: 13px; }
+footer nav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+footer .fine { width: 100%; font-size: 13px; padding-top: 18px; border-top: 1px solid var(--line); }
+footer .fine a:hover { color: var(--ink); }
 
 @media (max-width: 900px) {
-  .feature, .feature.flip { grid-template-columns: 1fr; gap: 30px; margin-bottom: 80px; }
+  .feature, .feature.flip { grid-template-columns: 1fr; gap: 32px; margin-bottom: 90px; }
   .feature.flip .copy { order: 0; }
   .grid6 { grid-template-columns: 1fr 1fr; }
-  .sticker.s1 { left: -8px; } .sticker.s2 { right: -8px; }
 }
 @media (max-width: 640px) {
   .nav-links a:not(.btn) { display: none; }
-  .hero { padding-top: 48px; }
-  .grid6 { grid-template-columns: 1fr; }
-  .frame { box-shadow: 6px 6px 0 var(--ink); border-radius: 12px; }
-  .frame .bar { height: 30px; } .frame .bar span { display: none; }
-  .sticker { padding: 8px 12px; box-shadow: 3px 3px 0 var(--ink); }
-  .sticker.s1 { top: auto; bottom: -18px; left: 4px; } .sticker.s2 { top: -18px; right: 4px; } .sticker.s3 { display: none; }
-  .term pre { font-size: 13.5px; padding: 20px; }
-  .problem { padding-top: 80px; } .features { padding-top: 70px; } .host { padding: 80px 0; }
+  .hero { padding-top: 56px; }
+  .grid6 { grid-template-columns: 1fr; gap: 30px; }
+  .frame { border-radius: 10px; }
+  .frame .bar { height: 26px; } .frame .bar span { display: none; }
+  .shot { margin-top: 52px; }
+  .term pre { font-size: 13px; padding: 20px; }
+  .problem { padding-top: 96px; } .features { padding-top: 96px; } .host { padding: 90px 0; margin-top: 100px; }
+  .section-head { margin-bottom: 64px; }
   footer nav { margin-left: 0; }
 }
 </style>
@@ -186,35 +181,33 @@ footer .fine { width: 100%; font-size: 13px; }
 <main>
 <section class="hero">
   <div class="wrap">
-    <div class="kicker">Self-hosted font library · Open source</div>
-    <h1>Every font you own. <em class="acc">One home.</em></h1>
+    <div class="label">A self-hosted font library · open source</div>
+    <h1>Every font you own. <em>One home</em><span class="cursor"></span></h1>
     <p class="lede">Point Typestash at a folder of fonts and get a searchable gallery with live previews,
       a real type tester, glyph maps, side-by-side compare and one-click downloads.
       On your NAS or server, in any browser.</p>
     <div class="ctas">
       <a class="btn primary" href="demo/">Try the live demo
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       <a class="btn ghost" href="https://github.com/jatinkrmalik/typestash">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         Star on GitHub</a>
     </div>
-    <div class="facts"><span>Free &amp; MIT licensed</span><span>One Docker command</span><span>amd64 · arm64</span><span>No account, no tracking</span></div>
+    <div class="facts">Free and MIT licensed · one Docker command · amd64 and arm64 · no accounts, no tracking</div>
 
-    <div class="shot">
+    <figure class="shot">
       <div class="frame">
         <div class="bar"><i></i><i></i><i></i><span>fonts.home.lan</span></div>
         <img src="img/gallery-light.png" width="2160" height="1440" alt="The Typestash gallery: a grid of font cards, each set in its own font">
       </div>
-      <div class="sticker s1">every card in its own font</div>
-      <div class="sticker s2">⌘K for everything</div>
-      <div class="sticker s3">12 themes</div>
-    </div>
+      <figcaption>The gallery in the Paper theme. Every card is set in its own font.</figcaption>
+    </figure>
   </div>
 </section>
 
 <section class="problem">
   <div class="wrap">
-    <h2>Fonts everywhere.<br><em class="acc">Found nowhere.</em></h2>
+    <h2>Fonts everywhere.<br><em>Found nowhere.</em></h2>
     <p>A zip from a client, a folder from an old laptop, that typeface you bought for one invite.
       Desktop font managers only see one machine. Typestash turns a folder on your server into a
       font library you can open from anywhere.</p>
@@ -228,15 +221,15 @@ footer .fine { width: 100%; font-size: 13px; }
 <section class="features" id="features">
   <div class="wrap">
     <div class="section-head">
-      <div class="kicker">What you get</div>
-      <h2>Built for people who <em class="acc">collect</em> type.</h2>
+      <div class="label">What it does</div>
+      <h2>A font manager that <em>lives on your server.</em></h2>
       <p>Everything is read from inside the font files: names, weights, axes, features, scripts and licences.
         Not guessed from file names.</p>
     </div>
 
     <div class="feature">
       <div class="copy">
-        <div class="num">01 · GALLERY</div>
+        <div class="num">01</div>
         <h3>Every font, at a glance</h3>
         <p>Each card is set in its own font. Type your own sample, resize, and switch between grid and list.</p>
         <ul>
@@ -250,7 +243,7 @@ footer .fine { width: 100%; font-size: 13px; }
 
     <div class="feature flip">
       <div class="copy">
-        <div class="num">02 · FAMILY</div>
+        <div class="num">02</div>
         <h3>Dig into every family</h3>
         <p>A proper type tester for every family, with the details you normally need three apps for.</p>
         <ul>
@@ -264,7 +257,7 @@ footer .fine { width: 100%; font-size: 13px; }
 
     <div class="feature">
       <div class="copy">
-        <div class="num">03 · COMPARE</div>
+        <div class="num">03</div>
         <h3>Compare side by side</h3>
         <p>Put up to eight fonts head to head and actually choose.</p>
         <ul>
@@ -278,7 +271,7 @@ footer .fine { width: 100%; font-size: 13px; }
 
     <div class="feature flip">
       <div class="copy">
-        <div class="num">04 · THEMES &amp; KEYBOARD</div>
+        <div class="num">04</div>
         <h3>Twelve themes, keyboard first</h3>
         <p>Paper, Ink, Dracula, Nord, Tokyo Night, Catppuccin, Gruvbox and more. Every theme passes WCAG AA for text.</p>
         <ul>
@@ -290,13 +283,16 @@ footer .fine { width: 100%; font-size: 13px; }
       <div class="frame"><div class="bar"><i></i><i></i><i></i></div><img loading="lazy" src="img/themes.png" width="2160" height="1440" alt="Theme panel with twelve light and dark themes"></div>
     </div>
 
-    <div class="grid6">
-      <div class="card"><div class="ic">⤓</div><h4>Drag, drop, done</h4><p>Drop fonts or .zip archives anywhere on the page. They're validated, de-duplicated and filed as Uploads/&lt;Family&gt;/.</p></div>
-      <div class="card"><div class="ic">◫</div><h4>Download anything</h4><p>One style, a whole family as a zip, a collection, or a PNG specimen sheet.</p></div>
-      <div class="card"><div class="ic">⌗</div><h4>Real metadata</h4><p>Designer, foundry, version, licence and language support, read from inside each font.</p></div>
-      <div class="card"><div class="ic">♲</div><h4>Housekeeping</h4><p>A duplicates &amp; issues page lists identical files and fonts that can't be read. Nothing is ever deleted.</p></div>
-      <div class="card"><div class="ic">Aa</div><h4>Every format</h4><p>TTF, OTF, WOFF, WOFF2 and TTC/OTC collections, including every face inside a collection.</p></div>
-      <div class="card"><div class="ic">⚿</div><h4>Yours, privately</h4><p>Runs on your hardware. No accounts, no telemetry, optional password for the whole app.</p></div>
+    <div class="more">
+      <div class="label">And the rest</div>
+      <div class="grid6">
+        <div><h4>Drag, drop, done</h4><p>Drop fonts or .zip archives anywhere on the page. They're validated, de-duplicated and filed as Uploads/&lt;Family&gt;/.</p></div>
+        <div><h4>Download anything</h4><p>One style, a whole family as a zip, a collection, or a PNG specimen sheet.</p></div>
+        <div><h4>Real metadata</h4><p>Designer, foundry, version, licence and language support, read from inside each font.</p></div>
+        <div><h4>Housekeeping</h4><p>A duplicates and issues page lists identical files and fonts that can't be read. Nothing is ever deleted.</p></div>
+        <div><h4>Every format</h4><p>TTF, OTF, WOFF, WOFF2 and TTC/OTC collections, including every face inside a collection.</p></div>
+        <div><h4>Yours, privately</h4><p>Runs on your hardware. No accounts, no telemetry, and an optional password for the whole app.</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -304,8 +300,8 @@ footer .fine { width: 100%; font-size: 13px; }
 <section class="host" id="self-host">
   <div class="wrap">
     <div class="section-head">
-      <div class="kicker">Self-host it</div>
-      <h2>Your server. Your fonts. <em class="acc">One command.</em></h2>
+      <div class="label">Self-host it</div>
+      <h2>Your server. Your fonts. <em>One command.</em></h2>
       <p>A small multi-arch image for x86 and ARM: NAS boxes, Raspberry Pi, Apple Silicon. Your fonts folder stays as it is.</p>
     </div>
     <div class="term">
@@ -317,7 +313,7 @@ footer .fine { width: 100%; font-size: 13px; }
     ghcr.io/jatinkrmalik/typestash:latest
 <span class="c"># then open http://localhost:8080 and drop some fonts on the page</span></pre>
     </div>
-    <div class="chips">
+    <div class="links">
       <a href="https://github.com/jatinkrmalik/typestash#docker-compose">Docker Compose</a>
       <a href="https://github.com/jatinkrmalik/typestash#unraid">Unraid template</a>
       <a href="https://github.com/jatinkrmalik/typestash/pkgs/container/typestash">ghcr.io image</a>
