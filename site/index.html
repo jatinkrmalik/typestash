@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Typestash · self-hosted font library and font manager</title>
-<meta name="description" content="A self-hosted font library: live previews, a type tester, glyph maps, compare and downloads for every font on your server. Free, one Docker command.">
+<meta name="description" content="A self-hosted font manager for every device you own: host it once, then preview, compare and download your fonts from any browser. Free, one Docker command.">
 <meta name="keywords" content="font manager, self-hosted, font library, font gallery, type tester, glyph map, docker, homelab, NAS, open source">
 <meta name="author" content="Jatin K Malik">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -77,7 +77,7 @@
           "name": "Is it a FontBase or NexusFont alternative?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "For browsing, previewing, comparing and organising, yes, with one difference: desktop font managers live on one computer, while Typestash runs on your server and works in any browser. It doesn't install fonts into your operating system yet; syncing a collection to your desktop is on the roadmap."
+            "text": "For browsing, previewing, comparing and organising, yes. The big difference: desktop font managers live on one computer, while Typestash runs once on your server or home lab and works on every device you own, in any browser. It doesn't install fonts into your operating system yet; syncing a collection to your desktop is on the roadmap."
           }
         },
         {
@@ -243,6 +243,25 @@ figcaption { margin-top: 16px; font: italic 400 15px/1.4 var(--serif); color: va
 .row span b { color: var(--muted); font-weight: 400; margin-right: 7px; }
 @keyframes slide { to { transform: translateX(-50%); } }
 
+/* how it's different */
+.diff { padding: 130px 0 10px; }
+.diff .section-head { margin-bottom: 40px; }
+.devices { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0 auto 44px; }
+.devices span { font: 500 13.5px/1 var(--mono); color: var(--ink-2); padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--card); }
+.compare-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 960px; margin: 0 auto; }
+.cmp-card { border: 1px solid var(--line-2); border-radius: 14px; padding: 26px 28px 22px; background: color-mix(in srgb, var(--card) 55%, transparent); }
+.cmp-card.ours { background: var(--card); border-color: var(--ink); box-shadow: var(--shadow); }
+.cmp-card .label { margin-bottom: 12px; }
+.cmp-card.ours .label { color: var(--ink); font-weight: 600; }
+.cmp-card ul { list-style: none; margin: 0; padding: 0; }
+.cmp-card li { padding: 10px 0 10px 26px; border-top: 1px solid var(--line); position: relative; color: var(--ink-2); font-size: 15.5px; }
+.cmp-card li::before { content: "–"; position: absolute; left: 4px; color: var(--muted); }
+.cmp-card.ours li { color: var(--ink); }
+.cmp-card.ours li::before { content: "✓"; color: var(--ink); }
+.diff-note { max-width: 640px; margin: 26px auto 0; text-align: center; font-size: 14.5px; color: var(--muted); }
+.diff-note a { color: var(--ink-2); }
+@media (max-width: 760px) { .compare-cards { grid-template-columns: 1fr; } .diff { padding-top: 96px; } }
+
 /* features */
 .features { padding: 140px 0 40px; }
 .section-head { text-align: center; max-width: 720px; margin: 0 auto 96px; }
@@ -342,6 +361,7 @@ footer .fine a:hover { color: var(--ink); }
   <div class="wrap">
     <a class="brand" href="./"><img src="img/icon-512.png" alt="">Typestash</a>
     <nav class="nav-links">
+      <a href="#why-typestash">Why</a>
       <a href="#features">Features</a>
       <a href="#self-host">Self-host</a>
       <a href="#faq">FAQ</a>
@@ -356,9 +376,9 @@ footer .fine a:hover { color: var(--ink); }
   <div class="wrap">
     <div class="label">A self-hosted font library · open source</div>
     <h1>Every font you own. <em>One home</em><span class="cursor"></span></h1>
-    <p class="lede">Point Typestash at a folder of fonts and get a searchable gallery with live previews,
-      a real type tester, glyph maps, side-by-side compare and one-click downloads.
-      On your NAS or server, in any browser.</p>
+    <p class="lede">Host it once on your server or home lab, and every device you own gets your whole
+      font library in a browser: live previews, a real type tester, glyph maps, side-by-side
+      compare and one-click downloads.</p>
     <div class="ctas">
       <a class="btn primary" href="demo/">Try the live demo
         <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -402,6 +422,44 @@ footer .fine a:hover { color: var(--ink); }
   <div class="marquee" aria-hidden="true">
     <div class="row" id="r1"></div>
     <div class="row r2" id="r2"></div>
+  </div>
+</section>
+
+<section class="diff" id="why-typestash">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="label">How it's different</div>
+      <h2>Not another font manager for <em>one machine.</em></h2>
+      <p>Desktop font managers like FontBase and NexusFont live on one computer. Typestash runs once
+        on your server, NAS or home lab, and works on every device you own. If it has a web browser,
+        it has your fonts.</p>
+    </div>
+    <div class="devices" aria-hidden="true">
+      <span>Laptop</span><span>Desktop</span><span>Work machine</span><span>Tablet</span><span>Phone</span>
+    </div>
+    <div class="compare-cards">
+      <div class="cmp-card">
+        <div class="label">Desktop font managers</div>
+        <ul>
+          <li>Installed on each computer, one at a time</li>
+          <li>Your fonts live on that computer's disk</li>
+          <li>A new laptop means installing and setting up again</li>
+          <li>Sharing means exporting files, or a paid sync plan</li>
+        </ul>
+      </div>
+      <div class="cmp-card ours">
+        <div class="label">Typestash</div>
+        <ul>
+          <li>Runs once, on your server, NAS or home lab</li>
+          <li>Your fonts live in one folder you control</li>
+          <li>A new device just opens the URL, nothing to install</li>
+          <li>Share a link on your network, with an optional password</li>
+        </ul>
+      </div>
+    </div>
+    <p class="diff-note">One thing desktop apps still do that Typestash doesn't yet: install fonts into your
+      operating system. Syncing a collection to your desktop is on the
+      <a href="https://github.com/jatinkrmalik/typestash/blob/main/ROADMAP.md">roadmap</a>.</p>
   </div>
 </section>
 
@@ -522,7 +580,7 @@ footer .fine a:hover { color: var(--ink); }
     </div>
     <div class="faq-list">
       <details open><summary>What is Typestash?</summary><p>A self-hosted font library and font manager. Point it at a folder of fonts on your server or NAS and you get a searchable web gallery with live previews, a type tester, glyph maps, side-by-side compare, collections and downloads, from any browser on any device.</p></details>
-      <details><summary>Is it a FontBase or NexusFont alternative?</summary><p>For browsing, previewing, comparing and organising, yes, with one difference: desktop font managers live on one computer, while Typestash runs on your server and works in any browser. It doesn't install fonts into your operating system yet; syncing a collection to your desktop is on the <a href="https://github.com/jatinkrmalik/typestash/blob/main/ROADMAP.md">roadmap</a>.</p></details>
+      <details><summary>Is it a FontBase or NexusFont alternative?</summary><p>For browsing, previewing, comparing and organising, yes. The big difference: desktop font managers live on one computer, while Typestash runs once on your server or home lab and works on every device you own, in any browser. It doesn't install fonts into your operating system yet; syncing a collection to your desktop is on the <a href="https://github.com/jatinkrmalik/typestash/blob/main/ROADMAP.md">roadmap</a>.</p></details>
       <details><summary>How do I install it?</summary><p>One Docker command (see <a href="#self-host">Self-host it</a> above). There's also a Docker Compose file and an Unraid template in the repo, or you can run it without Docker on Python 3.11+. Then open port 8080 and drop some fonts on the page.</p></details>
       <details><summary>Which font formats does it support?</summary><p>TTF, OTF, WOFF and WOFF2, plus TTC/OTC collections, where every face inside is listed on its own. You can also upload .zip archives of fonts.</p></details>
       <details><summary>Will it change or delete my font files?</summary><p>No. Typestash only reads your fonts folder. New uploads are added under <code>Uploads/&lt;Family&gt;/</code>, duplicates are skipped, and nothing is ever modified or deleted.</p></details>

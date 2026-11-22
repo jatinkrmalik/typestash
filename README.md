@@ -3,8 +3,8 @@
 <h1 align="center">Typestash</h1>
 
 <p align="center"><b>A self-hosted home for every font you own.</b><br>
-Point it at a folder of fonts and get a searchable gallery with live previews,<br>
-a proper type tester, glyph maps, collections and one-click downloads.</p>
+Host it once on your server or home lab, then use it from every device you own, in any browser.<br>
+A searchable gallery with live previews, a proper type tester, glyph maps, collections and one-click downloads.</p>
 
 <p align="center">
   <a href="https://github.com/jatinkrmalik/typestash/actions/workflows/docker.yml"><img src="https://github.com/jatinkrmalik/typestash/actions/workflows/docker.yml/badge.svg" alt="Docker image"></a>
@@ -51,6 +51,22 @@ browser, and download from whenever you need a font.
 
 Your fonts stay plain files in a folder you choose. Typestash only reads them and
 keeps a small index next to them, so Samba, rsync and your backups keep working.
+
+## How it's different
+
+Desktop font managers like FontBase and NexusFont are installed on one computer and
+manage the fonts on that computer. Typestash runs **once**, on your server, NAS or home
+lab, and every device on your network gets the whole library in a browser: your laptop,
+your work machine, a tablet, even your phone. Nothing to install on each device.
+
+| | Desktop font managers | Typestash |
+|---|---|---|
+| Runs on | Each computer you install it on | Once, on your server, NAS or home lab |
+| Use it from | That computer | Any device with a web browser |
+| Your fonts live | On that computer's disk | In one folder on your server |
+| A new laptop or phone | Install and set up again | Open the URL |
+| Share with a colleague | Export, or a paid sync plan | Send them the link (optional password) |
+| Installs fonts into your OS | Yes | Not yet: desktop sync is on the [roadmap](ROADMAP.md) |
 
 ## Features
 
