@@ -224,6 +224,40 @@ Typestash is a library for fonts **you are allowed to use**. It does not grant a
 rights to the fonts in it. Each family page shows the license text embedded in the
 font. Be careful about exposing commercial fonts to people outside your license.
 
+## Architecture
+
+![How Typestash fits together: the browser talks to one Python process in a Docker container, which indexes the fonts folder with fontTools into a SQLite file](docs/architecture.svg)
+
+- **One process, no framework.** `app/server.py` is Python's standard-library
+  `ThreadingHTTPServer` plus [fontTools](https://github.com/fonttools/fonttools) (and brotli
+  for WOFF2). The front end in `app/static/` is plain HTML, CSS and JavaScript with no build
+  step. The whole image is a slim Python base plus two pip packages.
+- **Indexing.** On start, and then every `TYPESTASH_RESCAN_SECONDS` (10 minutes by default),
+  the indexer walks the fonts folder and opens only new or changed files, spotted by size and
+  modification time. For every face (faces inside TTC/OTC collections are split out) it reads
+  the names, weight, width, italic and monospace flags, variable axes and named instances,
+  OpenType features, the scripts its character map covers, vertical metrics, the licence
+  text and URL, and a category from PANOSE, keywords and a glyph-shape check. Files are
+  hashed with SHA-256 to find exact duplicates. Everything goes into one SQLite file,
+  `/data/index.db`.
+- **Serving.** The browser fetches the library once from `/api/library` and filters, sorts
+  and searches it locally, so the UI stays fast. Previews load each font lazily with the
+  `FontFace` API as its card scrolls into view, from `/font/:id` with caching headers (faces
+  from collections are extracted once and cached). Family and collection zips are built on
+  the fly.
+- **Uploads.** `POST /api/upload` takes font files and zips (up to
+  `TYPESTASH_MAX_UPLOAD_MB`), opens each with fontTools to make sure it's a real font, skips
+  anything already in the library by hash, and files the rest under `Uploads/<Family>/`.
+- **Your data.** Favourites, collections, notes and category overrides live in the same
+  SQLite file. Theme, preview and compare preferences stay in the browser's localStorage.
+  Typestash never modifies or deletes a font file.
+- **Security.** Optional HTTP basic auth (`TYPESTASH_PASSWORD`, `/healthz` stays open for
+  health checks). The container starts as root only to switch to `PUID`/`PGID`. No accounts,
+  no telemetry, no calls home.
+- **The demo** is the same front end with a `TYPESTASH_DEMO` flag. `demo/build_demo.py`
+  imports the real server module, indexes the demo fonts and writes every API response as
+  static JSON, so GitHub Pages can serve it with no server.
+
 ## Development
 
 ```sh
