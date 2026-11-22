@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/jatinkrmalik/typestash/discussions
+    about: Ask how to do something, share your setup, or discuss an idea.
+  - name: Try the live demo
+    url: https://typestash.j47.in/demo/
+    about: 445 open-licensed fonts, nothing to install.

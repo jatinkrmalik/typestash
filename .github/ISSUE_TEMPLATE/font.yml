@@ -1,0 +1,23 @@
+name: A font doesn't index or look right
+description: A font is missing, broken, in the wrong category, or previews badly
+labels: ["fonts"]
+body:
+  - type: input
+    id: font
+    attributes:
+      label: Which font?
+      description: Name and where it's from (Google Fonts, a foundry, a client…). Please don't attach paid fonts.
+    validations:
+      required: true
+  - type: dropdown
+    id: problem
+    attributes:
+      label: What's wrong?
+      options: ["Not in the library at all", "Listed under Duplicates & issues as unreadable", "Wrong category", "Wrong name, weight or style", "Preview looks wrong", "Something else"]
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: File format (TTF, OTF, WOFF2, TTC…), and a screenshot if it's visual.

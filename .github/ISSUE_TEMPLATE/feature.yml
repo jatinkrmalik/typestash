@@ -1,0 +1,23 @@
+name: Feature request
+description: An idea for Typestash
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: "Check the [roadmap](https://github.com/jatinkrmalik/typestash/blob/main/ROADMAP.md) first: if it's there, a 👍 on its discussion helps prioritise it."
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The problem or workflow, before the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+  - type: input
+    id: source
+    attributes:
+      label: How did you find Typestash? (optional)
+      placeholder: "Reddit, Hacker News, selfh.st, a friend…"

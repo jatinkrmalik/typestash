@@ -1,0 +1,33 @@
+name: Bug report
+description: Something in Typestash doesn't work as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you saw instead. Screenshots help.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Shown in Settings → this server, or the footer.
+      placeholder: "0.3.0"
+  - type: dropdown
+    id: install
+    attributes:
+      label: How do you run it?
+      options: ["Docker / Docker Compose", "Unraid template", "Without Docker (Python)", "The live demo"]
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: "Firefox 140 on macOS, Chrome on a Pixel…"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Container logs (if relevant)
+      description: "`docker logs typestash` around the time it happened."
+      render: text
